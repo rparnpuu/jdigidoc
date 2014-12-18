@@ -343,7 +343,7 @@ public class DigiDocVerifyFactory {
         	if(cert == null)
         		throw new DigiDocException(DigiDocException.ERR_VERIFY, "Invalid or missing signers cert!", null); 
         	if(bSoftCert) {
-        	  String sigType = ConfigManager.instance().sigMeth2SigType(sigMethod);
+        	  String sigType = ConfigManager.instance().sigMeth2SigType(sigMethod, true);
           	  if(m_logger.isDebugEnabled()) 
                 	m_logger.debug("Verify xml:\n---\n" + new String(digest) + "\n---\n len: " + 
                 			digest.length + " method: " + sigMethod + " sig-type: " + sigType + "\n---\n" + 
@@ -354,6 +354,18 @@ public class DigiDocVerifyFactory {
         	  sig.initVerify(cert.getPublicKey());
               sig.update(digest);
               rc = sig.verify(signature);
+              // if verification fails with CVC cipher then try again with same signature algorithm but non-cvc cipher
+              if(!rc && sigMethod.indexOf("ecdsa") != -1) {
+            	  sigType = ConfigManager.instance().sigMeth2SigType(sigMethod, false);
+              	  if(m_logger.isDebugEnabled()) 
+                    	m_logger.debug("Verify again xml:\n---\n" + new String(digest) + "\n---\n len: " + 
+                    			digest.length + " method: " + sigMethod + " sig-type: " + sigType + "\n---\n" + 
+                    			ConvertUtils.bin2hex(signature) + " sig-len: " + signature.length);
+              	sig = java.security.Signature.getInstance(sigType, ConfigManager.addProvider());
+          	    sig.initVerify(cert.getPublicKey());
+                sig.update(digest);
+                rc = sig.verify(signature);
+              }
             } else {
               if(m_logger.isDebugEnabled()) 
                 	m_logger.debug("Verify sig: " + signature.length + " bytes, alg: " + DIGIDOC_VERIFY_ALGORITHM + " sig-alg: " + sigMethod);
@@ -415,7 +427,9 @@ public class DigiDocVerifyFactory {
         try {
             byte[] dig = sig.getSignedInfo().calculateDigest();
             if(m_logger.isDebugEnabled()) 
-            	m_logger.debug("SignedInfo real digest: " + Base64Util.encode(dig, 0) + " hex: " + SignedDoc.bin2hex(dig));
+            	m_logger.debug("SignedInfo real digest: " + Base64Util.encode(dig, 0) + " hex: " + SignedDoc.bin2hex(dig) +
+            			" sig: " + ConvertUtils.bin2hex(sig.getSignatureValue().getValue()) + 
+            			" len: " + sig.getSignatureValue().getValue().length);
             if(sdoc.getFormat().equals(SignedDoc.FORMAT_BDOC) && // check digest type
             	(sig.getSignedInfo().getSignatureMethod().equals(SignedDoc.RSA_SHA1_SIGNATURE_METHOD) ||
             	 sig.getSignedInfo().getSignatureMethod().equals(SignedDoc.ECDSA_SHA1_SIGNATURE_METHOD)) &&

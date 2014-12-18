@@ -158,7 +158,7 @@ public class Pkcs12SignatureFactory
     	try {
 		  if(sig != null && sig.getSignedInfo() != null && sig.getSignedInfo().getSignatureMethod() != null) 
 			sigMeth = sig.getSignedInfo().getSignatureMethod();
-		  sigType = ConfigManager.instance().sigMeth2SigType(sigMeth);
+		  sigType = ConfigManager.instance().sigMeth2SigType(sigMeth, true); // allways use cvc ciphers
 		  if(m_logger.isDebugEnabled())
 			m_logger.debug("Key: " + ((key != null) ? "OK, algorithm: " + key.getAlgorithm() : "NULL") + " method: " + sigMeth + " type: " + sigType);
 		  if(sigType == null)
