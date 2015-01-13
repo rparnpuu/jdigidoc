@@ -551,22 +551,21 @@ public class ConfigManager {
      * Returns signature method URI corresponding to
      * searched digest type value
      * @param sigMeth signature method uri
-     * @param bCvc CVC or ASN.1 cipher (only used for ECDSA ciphers)
      * @return signature method URI
      */
-    public static String sigMeth2SigType(String sigMeth, boolean bCvc)
+    public static String sigMeth2SigType(String sigMeth)
     {
     	if(sigMeth != null) {
     		if(sigMeth.equals(SignedDoc.ECDSA_SHA1_SIGNATURE_METHOD))
-        		return bCvc ? "SHA1withCVC-ECDSA" : "SHA1withECDSA";
+        		return "SHA1withCVC-ECDSA";
         	if(sigMeth.equals(SignedDoc.ECDSA_SHA224_SIGNATURE_METHOD))
-        		return bCvc ? "SHA224withCVC-ECDSA" : "SHA224withECDSA";
+        		return "SHA224withCVC-ECDSA";
        		if(sigMeth.equals(SignedDoc.ECDSA_SHA256_SIGNATURE_METHOD))
-       			return bCvc ? "SHA256withCVC-ECDSA" : "SHA256withECDSA";
+       			return "SHA256withCVC-ECDSA";
        		if(sigMeth.equals(SignedDoc.ECDSA_SHA384_SIGNATURE_METHOD))
-       			return bCvc ? "SHA384withCVC-ECDSA" : "SHA384withECDSA";
+       			return "SHA384withCVC-ECDSA";
        		if(sigMeth.equals(SignedDoc.ECDSA_SHA512_SIGNATURE_METHOD))
-        		return bCvc ? "SHA512withCVC-ECDSA" : "SHA512withECDSA";    			
+        		return "SHA512withCVC-ECDSA";    			
     		if(sigMeth.equals(SignedDoc.RSA_SHA1_SIGNATURE_METHOD))
     			return "SHA1withRSA";
     		if(sigMeth.equals(SignedDoc.RSA_SHA224_SIGNATURE_METHOD))
