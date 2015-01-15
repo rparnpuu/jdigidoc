@@ -495,13 +495,12 @@ public class DigiDocVerifyFactory {
 		try {
 			if(m_logger.isDebugEnabled()) 
 	        	m_logger.debug("Verifying CA of signature: " + sig.getId() + " signed-at: " + ConvertUtils.date2string(sig.getSignedProperties().getSigningTime(), sig.getSignedDoc()) + " produced: " + ConvertUtils.date2string(sig.getSignatureProducedAtTime(), sig.getSignedDoc()));
-			boolean bUseLocal = ConfigManager.instance().getBooleanProperty("DIGIDOC_USE_LOCAL_TSL", false);
-	        TrustServiceFactory tslFac = ConfigManager.instance().getTslFactory();
+			TrustServiceFactory tslFac = ConfigManager.instance().getTslFactory();
 	        if(sig.getKeyInfo().getSignersCertificate() == null) {
 	        	lerrs.add(new DigiDocException(DigiDocException.ERR_SIGNERS_CERT, "Signers cert missing!", null));
 	        	return false;
 	        }
-	        X509Certificate caCert = tslFac.findCaForCert(sig.getKeyInfo().getSignersCertificate(), bUseLocal, sig.getSignatureProducedAtTime());
+	        X509Certificate caCert = tslFac.findCaForCert(sig.getKeyInfo().getSignersCertificate(), true, sig.getSignatureProducedAtTime());
 	        X509Certificate cert = sig.getKeyInfo().getSignersCertificate();
 	        if(m_logger.isDebugEnabled()) 
             	m_logger.debug("Check signer: " + cert.getSubjectDN().getName() +

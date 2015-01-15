@@ -327,12 +327,10 @@ public class DigiDocGenFactory {
         registerCert(cert, CertValue.CERTVAL_TYPE_SIGNER, null, sig);
         if(m_logger.isDebugEnabled())
         	m_logger.debug("Signer cert: " + cert.getSubjectDN().getName());
-        boolean bUseLocal = ConfigManager.instance().getBooleanProperty("DIGIDOC_USE_LOCAL_TSL", false);
-        
         if(sdoc.getFormat().equals(SignedDoc.FORMAT_BDOC)) {
         	TrustServiceFactory tslFac = ConfigManager.instance().getTslFactory();
         	// first lookup in TSL-s
-        	X509Certificate ca = tslFac.findCaForCert(cert, bUseLocal, null);
+        	X509Certificate ca = tslFac.findCaForCert(cert, true, null);
         	if(ca != null) {
         		String caId = sig.getId() + "-CA_CERT" + sig.countCertValues();
         		registerCert(ca, CertValue.CERTVAL_TYPE_CA, caId, sig);
@@ -523,12 +521,11 @@ public class DigiDocGenFactory {
     		m_logger.debug("Finalize XAdES-TM: " + sig.getId() + " profile: " + sig.getProfile());
     	NotaryFactory notFac = ConfigManager.instance().getNotaryFactory(); 
         X509Certificate cert = sig.getKeyInfo().getSignersCertificate();
-        boolean bUseLocal = ConfigManager.instance().getBooleanProperty("DIGIDOC_USE_LOCAL_TSL", false);
         TrustServiceFactory tslFac = ConfigManager.instance().getTslFactory();
-        String ocspUrl = tslFac.findOcspUrlForCert(cert, 0, bUseLocal);
+        String ocspUrl = tslFac.findOcspUrlForCert(cert, 0, true);
         if(ocspUrl == null)
         	ocspUrl = ConfigManager.instance().getProperty("DIGIDOC_OCSP_RESPONDER_URL");
-        X509Certificate caCert = tslFac.findCaForCert(cert, bUseLocal, null);  
+        X509Certificate caCert = tslFac.findCaForCert(cert, true, null);  
         if(m_logger.isDebugEnabled())
     		m_logger.debug("Get confirmation for cert: " + 
     				((cert != null) ? ConvertUtils.getCommonName(cert.getSubjectDN().getName()) : "NULL") +
@@ -551,7 +548,7 @@ public class DigiDocGenFactory {
         // if the request was successful then
         // create new data memebers
         if(sdoc.getFormat().equals(SignedDoc.FORMAT_BDOC) && (rcert != null)) {
-        	X509Certificate rcacert = tslFac.findCaForCert(rcert, bUseLocal, null);
+        	X509Certificate rcacert = tslFac.findCaForCert(rcert, true, null);
         	if(m_logger.isDebugEnabled())
         		m_logger.debug("Register responders CA: " + ((rcacert != null) ? rcacert.getSubjectDN().getName() : "NULL"));
         	if(rcacert != null) {

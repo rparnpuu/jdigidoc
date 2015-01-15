@@ -158,8 +158,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     {
     	try {
     	  TrustServiceFactory tslFac = ConfigManager.instance().getTslFactory();
-          boolean bUseLocal = ConfigManager.instance().getBooleanProperty("DIGIDOC_USE_LOCAL_TSL", false);
-    	  return tslFac.findOcspByCN(responderCN, bUseLocal);
+          return tslFac.findOcspByCN(responderCN, true);
     	} catch(Exception ex) {
     		m_logger.error("Error searching responder cert for: " + responderCN + " - " + ex);
     	}
@@ -178,8 +177,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     {
     	try {
     	  TrustServiceFactory tslFac = ConfigManager.instance().getTslFactory();
-          boolean bUseLocal = ConfigManager.instance().getBooleanProperty("DIGIDOC_USE_LOCAL_TSL", false);
-    	  return tslFac.findOcspsByCNAndNr(responderCN, bUseLocal, specificCertNr);
+          return tslFac.findOcspsByCNAndNr(responderCN, true, specificCertNr);
     	} catch(Exception ex) {
     		m_logger.error("Error searching responder cert for: " + responderCN + " - " + ex);
     	}
@@ -195,10 +193,9 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     {
     	try {
       	  TrustServiceFactory tslFac = ConfigManager.instance().getTslFactory();
-            boolean bUseLocal = ConfigManager.instance().getBooleanProperty("DIGIDOC_USE_LOCAL_TSL", false);
-      	  X509Certificate cert = tslFac.findOcspByCN(responderCN, bUseLocal);
+      	  X509Certificate cert = tslFac.findOcspByCN(responderCN, true);
       	  if(cert != null)
-      	    return tslFac.findCaForCert(cert, bUseLocal, null);
+      	    return tslFac.findCaForCert(cert, true, null);
       	} catch(Exception ex) {
       		m_logger.error("Error searching responder ca cert for: " + responderCN + " - " + ex);
       	}
@@ -222,10 +219,9 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         X509Certificate signersCert, String notId, String httpFrom) 
         throws DigiDocException
     {        
-    	boolean bUseLocal = ConfigManager.instance().getBooleanProperty("DIGIDOC_USE_LOCAL_TSL", false);
         TrustServiceFactory tslFac = ConfigManager.instance().getTslFactory();
-        X509Certificate caCert = tslFac.findCaForCert(signersCert, bUseLocal, null);
-        X509Certificate ocspCert = tslFac.findOcspByCN(ConvertUtils.getCommonName(ConvertUtils.convX509Name(signersCert.getIssuerX500Principal())), bUseLocal);
+        X509Certificate caCert = tslFac.findCaForCert(signersCert, true, null);
+        X509Certificate ocspCert = tslFac.findOcspByCN(ConvertUtils.getCommonName(ConvertUtils.convX509Name(signersCert.getIssuerX500Principal())), true);
         return getConfirmation(nonce, signersCert, caCert, ocspCert, notId, httpFrom);
     }
     
@@ -413,9 +409,8 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             	OCSPResp resp = new OCSPResp(sig.getUnsignedProperties().getNotary().getOcspResponseData()); 
             	if(resp != null && resp.getResponseObject() != null && notaryCert == null) {
             	  String respId = responderIDtoString((BasicOCSPResp)resp.getResponseObject());
-            	  boolean bUseLocal = ConfigManager.instance().getBooleanProperty("DIGIDOC_USE_LOCAL_TSL", false);
-                  TrustServiceFactory tslFac = ConfigManager.instance().getTslFactory();
-                  notaryCert = tslFac.findOcspByCN(ConvertUtils.getCommonName(respId), bUseLocal);
+            	  TrustServiceFactory tslFac = ConfigManager.instance().getTslFactory();
+                  notaryCert = tslFac.findOcspByCN(ConvertUtils.getCommonName(respId), true);
                   if(notaryCert != null) {
             	  sig.getUnsignedProperties().setRespondersCertificate(notaryCert);
             	  ee.sk.digidoc.CertID cid = new ee.sk.digidoc.CertID(sig, notaryCert, ee.sk.digidoc.CertID.CERTID_TYPE_RESPONDER);
@@ -451,10 +446,9 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     	//byte[] nonce = SignedDoc.digest(sig.getSignatureValue().getValue()); // sha256?
     	byte[] nonce = SignedDoc.digestOfType(sig.getSignatureValue().getValue(),
         		sig.getSignedDoc().getFormat().equals(SignedDoc.FORMAT_BDOC) ? SignedDoc.SHA256_DIGEST_TYPE : SignedDoc.SHA1_DIGEST_TYPE);
-    	boolean bUseLocal = ConfigManager.instance().getBooleanProperty("DIGIDOC_USE_LOCAL_TSL", false);
-        TrustServiceFactory tslFac = ConfigManager.instance().getTslFactory();
-        X509Certificate caCert = tslFac.findCaForCert(signersCert, bUseLocal, null);
-        X509Certificate ocspCert = tslFac.findOcspByCN(ConvertUtils.getCommonName(ConvertUtils.convX509Name(signersCert.getIssuerX500Principal())), bUseLocal);
+    	TrustServiceFactory tslFac = ConfigManager.instance().getTslFactory();
+        X509Certificate caCert = tslFac.findCaForCert(signersCert, true, null);
+        X509Certificate ocspCert = tslFac.findOcspByCN(ConvertUtils.getCommonName(ConvertUtils.convX509Name(signersCert.getIssuerX500Principal())), true);
         return getConfirmation(nonce, signersCert, caCert, ocspCert, notId, sig.getHttpFrom());
     }
     
@@ -517,8 +511,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         	// create the request
             DigiDocFactory ddocFac = ConfigManager.instance().getDigiDocFactory();
             TrustServiceFactory tslFac = ConfigManager.instance().getTslFactory();
-            boolean bUseLocal = ConfigManager.instance().getBooleanProperty("DIGIDOC_USE_LOCAL_TSL", false);
-        	X509Certificate caCert = tslFac.findCaForCert(cert, bUseLocal, null);
+            X509Certificate caCert = tslFac.findCaForCert(cert, true, null);
         	if(m_logger.isDebugEnabled()) {
         		m_logger.debug("Find CA for: " + SignedDoc.getCommonName(ConvertUtils.convX509Name(cert.getIssuerX500Principal())));
             	m_logger.debug("Check cert: " + cert.getSubjectDN().getName());            	
@@ -533,7 +526,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 m_logger.debug("REQUEST:\n" + Base64Util.encode(req.getEncoded(), 0));
             }    
             // send it
-            String ocspUrl = tslFac.findOcspUrlForCert(cert, 0, bUseLocal);
+            String ocspUrl = tslFac.findOcspUrlForCert(cert, 0, true);
             resp = sendRequestToUrl(req, ocspUrl, httpFrom, null, null);
             //debugWriteFile("resp1.der", resp.getEncoded());
             if(m_logger.isDebugEnabled()) {
@@ -706,9 +699,8 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     {
         try {
         	// create the request
-            boolean bUseLocal = ConfigManager.instance().getBooleanProperty("DIGIDOC_USE_LOCAL_TSL", false);
             TrustServiceFactory tslFac = ConfigManager.instance().getTslFactory();
-            X509Certificate caCert = tslFac.findCaForCert(cert, bUseLocal, null);
+            X509Certificate caCert = tslFac.findCaForCert(cert, true, null);
         	if(m_logger.isDebugEnabled()) {
         		m_logger.debug("Find CA for: " + SignedDoc.getCommonName(ConvertUtils.convX509Name(cert.getIssuerX500Principal())));
             	m_logger.debug("Check cert: " + cert.getSubjectDN().getName());            	
@@ -855,7 +847,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             			+ " SigVal hash: " + Base64Util.encode(nonce1, 0)
             			+ " SigVal hash hex: " + ConvertUtils.bin2hex(nonce1));
                 throw new DigiDocException(DigiDocException.ERR_OCSP_NONCE,
-                    "OCSP response's nonce doesn't match the requests nonce!", null);
+                   "OCSP response's nonce doesn't match the requests nonce!", null);
             }
             // check the response on our cert
             checkCertStatus(signersCert, basResp, caCert);
@@ -905,9 +897,8 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         				"No certificate to check! Error reading certificate from file?", null);
             // check the response on our cert
         	TrustServiceFactory tslFac = ConfigManager.instance().getTslFactory();
-        	boolean bUseLocal = ConfigManager.instance().getBooleanProperty("DIGIDOC_USE_LOCAL_TSL", false);
-            if(caCert == null)
-            	caCert = tslFac.findCaForCert(cert, bUseLocal, null);
+        	if(caCert == null)
+            	caCert = tslFac.findCaForCert(cert, true, null);
             if(m_logger.isDebugEnabled()) {
             	m_logger.debug("CA cert: " + ((caCert != null) ? caCert.getSubjectDN().getName() : "NULL"));
             	m_logger.debug("RESP: " + basResp);
@@ -1169,7 +1160,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             			" Real nonce: " + ((nonce2 != null) ? Base64Util.encode(nonce2, 0) : "NULL") + " noncelen: " + ((nonce2 != null) ? nonce2.length : 0)
             			+ " SigVal hash: " + Base64Util.encode(nonce1, 0)
             			+ " SigVal hash hex: " + ConvertUtils.bin2hex(nonce1) + " svlen: " + ((nonce1 != null) ? nonce1.length : 0));
-                	m_logger.debug("SIG:\n---\n" + sig.toString() + "\n--\n");
+                	//m_logger.debug("SIG:\n---\n" + sig.toString() + "\n--\n");
             	  }
                   throw new DigiDocException(DigiDocException.ERR_OCSP_NONCE,
                     "OCSP response's nonce doesn't match the requests nonce!", null);
@@ -1227,8 +1218,12 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
 			try {
 			byte[] nonce2 = null;
 			Set extOids = basResp.getNonCriticalExtensionOIDs();
+			//if(extOids.size() == 0)
+			//	extOids = basResp.getCriticalExtensionOIDs();
 			boolean bAsn1=false;
 			String sType = null;
+			if(m_logger.isDebugEnabled())
+        	m_logger.debug("Nonce exts: " + extOids.size());
 			if(extOids.size() >= 1) {
 				Extension ext = basResp.getExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
 				if(ext != null) {
@@ -1267,8 +1262,10 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             		bAsn1 = (sType != null);
             	}
             }
-            if(m_logger.isDebugEnabled())
+            if(m_logger.isDebugEnabled() && nonce2 != null)
             	m_logger.debug("Nonce hex: " + ConvertUtils.bin2hex(nonce2) + " b64: " + Base64Util.encode(nonce2) + " len: " + nonce2.length + " type: " + sType);
+            else
+            	m_logger.debug("No nonce");
             if(!bAsn1 && bCheckOcspNonce) {
         		throw new DigiDocException(DigiDocException.ERR_OCSP_NONCE,
                         "Invalid nonce: " + ((nonce2 != null) ? ConvertUtils.bin2hex(nonce2) + " length: " + nonce2.length : "NO-NONCE") + "!", null);
