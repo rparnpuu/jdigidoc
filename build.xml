@@ -188,8 +188,8 @@
 	</target>
 
 	<target name="dist-jar" depends="dist-compile" description="Create a JAR file.">
-                <delete file="${tmp.dir}/${ant.project.name}.jar" failonerror="false"/>
-                <jar destfile="${tmp.dir}/${ant.project.name}.jar" update="false">
+                <delete file="${tmp.dir}/jdigidoc-${env.JDD_VERSION}.jar" failonerror="false"/>
+                <jar destfile="${tmp.dir}/jdigidoc-${env.JDD_VERSION}.jar" update="false">
                         <fileset dir="${classes.dir}">
                                 <include name="**/*.*" />
                         </fileset>
@@ -205,9 +205,9 @@
         </target>
 
 	<target name="dist-util-jar" depends="esteidtestcerts,dist-jar">
-                <jar destfile="${tmp.dir}/jdigidocutil.jar">
+                <jar destfile="${tmp.dir}/jdigidocutil-${env.JDD_VERSION}.jar">
                 <manifest>
-                        <attribute name="Class-Path" value="esteidtestcerts.jar lib/esteidtestcerts.jar JDigiDoc.jar lib/bcmail-jdk15on-151.jar lib/bcpkix-jdk15on-151.jar lib/bcprov-jdk15on-151.jar lib/commons-codec-1.6.jar lib/log4j-1.2.7.jar lib/commons-compress-1.5.jar lib/iaikPkcs11Wrapper-1.1.7.jar ."/>
+                        <attribute name="Class-Path" value="esteidtestcerts.jar lib/esteidtestcerts.jar jdigidoc-${env.JDD_VERSION}.jar lib/bcmail-jdk15on-151.jar lib/bcpkix-jdk15on-151.jar lib/bcprov-jdk15on-151.jar lib/commons-codec-1.6.jar lib/log4j-1.2.7.jar lib/commons-compress-1.5.jar lib/iaikPkcs11Wrapper-1.1.7.jar ."/>
                         <attribute name="Main-Class" value="ee.sk.test.jdigidoc"/>
                 </manifest>
                 </jar>
