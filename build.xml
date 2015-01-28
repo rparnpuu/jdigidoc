@@ -152,7 +152,7 @@
 		</javac>
 	</target>
 
-	<target name="dist-compile" description="Compile with downloading jars and without ver change" depends="dist-libs,init,dist-init-libs">
+	<target name="dist-compile" description="Compile with downloading jarse" depends="dist-libs,init,dist-init-libs,verchg">
 		<javac destdir="${classes.dir}" target="1.5" debug="true"
                         deprecation="false" optimize="false" failonerror="true" encoding="UTF-8" source="1.5">
                         <src path="${src.dir}" />
