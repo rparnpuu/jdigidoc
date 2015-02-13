@@ -100,7 +100,7 @@
 	</target>
 
         <target name="verchg" description="Set version number">
-	  <replace file="${src.dir}/ee/sk/digidoc/Version.java" token="3.9.0" value="${env.JDD_VERSION}" />	
+	  <replace file="${src.dir}/ee/sk/digidoc/Version.java" token="LIB_VERSION" value="LIB_VERSION=&quot;${env.JDD_VERSION}&quot;;//" />	
 	</target>
 
 	<target name="init" description="Make init without local libs copying">

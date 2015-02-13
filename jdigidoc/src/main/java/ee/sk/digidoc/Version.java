@@ -8,6 +8,6 @@ public class Version {
 	/** program & library name */
 	public static final String LIB_NAME = "JDigiDoc";
 	/** program & library version */
-	public static final String LIB_VERSION = "3.9.0";
+	public static final String LIB_VERSION="3.10.0";
 	
 }
