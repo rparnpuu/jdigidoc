@@ -21,6 +21,12 @@ Building with Maven
 2. Run
      mvn install
 
+Some dependent jar-s like iaikPkcs11Wrapper.jar is not available from public Maven repos.
+So you have to register by IAIK and download it and then install the file to your local
+maven repo. For example:
+mvn install:install-file -Dfile=iaikPkcs11Wrapper.jar -DgroupId=iaik.pkcs -DartifactId=iaikPkcs11Wrapper -Dversion=1.2.16 -Dpackaging=jar
+Please see also maven install command syntax http://maven.apache.org/guides/mini/guide-3rd-party-jars-local.html
+
 Generating API documentation
 ----------------------------
 Run mvn javadoc:jar
