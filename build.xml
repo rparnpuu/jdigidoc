@@ -7,7 +7,6 @@
     	<property file="version.properties" />
 	<property environment="env" />
 	<property name="lib.dir" location="${env.HOME}/libs/jdigidoc" />
-	<property name="dlib.dir" location="lib" />
 	<property name="tmp.dir" location="tmp" />
 	<property name="doc.dir" location="doc" />
 	<property name="classes.dir" location="${tmp.dir}/classes" />

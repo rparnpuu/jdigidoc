@@ -5,14 +5,13 @@
 	<property name="resources.dir" location="jdigidoc/src/main/resources" />
 	<property name="certs.dir" location="jdigidoc/src/main/resources/certs" />
     	<property file="version.properties" />
-	<property environment="env" />
-	<property name="lib.dir" location="${env.HOME}/libs/jdigidoc" />
+	<!--<property environment="env" />-->
 	<property name="dlib.dir" location="lib" />
 	<property name="tmp.dir" location="tmp" />
 	<property name="doc.dir" location="doc" />
 	<property name="classes.dir" location="${tmp.dir}/classes" />
 	<property name="javadoc.gen.dir" location="${tmp.dir}/javadoc" />
-	<property name="${env.JDD_VERSION}" value="3.10.0-beeta3" />
+	<property name="env.JDD_VERSION" value="travis" />
 
 
 	<path id="travis-classpath">
@@ -27,10 +26,6 @@
         </patternset>
 
 	<!-- fileset used to generate javadoc for client.jar -->
-	<fileset dir="${src.dir}" id="javadoc-fileset">
-		<patternset refid="jar.patternset" />
-	</fileset>
-
 	<fileset dir="${src.dir}" id="javadoc-fileset">
 		<patternset refid="jar.patternset" />
 	</fileset>
@@ -50,30 +45,6 @@
                 <include name="certs/iaik-tsa*.crt" />
 	</fileset> 
 
-   	<fileset dir="${lib.dir}" id="jd-libs">
-		<include name="bcmail-jdk15on-151.jar" />
-		<include name="bcprov-jdk15on-151.jar" />
-		<include name="bcpkix-jdk15on-151.jar" />
-		<include name="commons-codec-1.6.jar" />
-		<include name="commons-compress-1.3.jar" />
-		<include name="iaikPkcs11Wrapper.jar" />
-		<include name="jakarta-log4j-1.2.6.jar" />
-	</fileset>
-
-	<fileset dir="${lib.dir}" id="jd-libs-and-bin">
-                <include name="bcmail-jdk15on-151.jar" />
-                <include name="bcprov-jdk15on-151.jar" />
-                <include name="bcpkix-jdk15on-151.jar" />
-                <include name="commons-codec-1.6.jar" />
-                <include name="commons-compress-1.3.jar" />
-                <include name="iaikPkcs11Wrapper.jar" />
-                <include name="jakarta-log4j-1.2.6.jar" />
-		<include name="linux32/*" />
-		<include name="linux64/*" />
-		<include name="macUniversal/*" />
-		<include name="win32/*" />
-		<include name="win64/*" />
-        </fileset> 
 
 	<target name="clean" description="Remove generated files">
 		<delete dir="${tmp.dir}"/>
@@ -91,9 +62,6 @@
 		<get src="http://maven.petalslink.com/others/es/mityc/jumbo/adsi/iaikPkcs11Wrapper/1.1.7/iaikPkcs11Wrapper-1.1.7.jar" dest="${dlib.dir}/iaikPkcs11Wrapper-1.1.7.jar" verbose="true" />
 	</target>
 
-        <target name="verchg" description="Set version number">
-	  <replace file="${src.dir}/ee/sk/digidoc/Version.java" token="LIB_VERSION" value="LIB_VERSION = &quot;${env.JDD_VERSION}&quot;; // " />	
-	</target>
 
 	<target name="init" description="Make init without local libs copying">
 		<mkdir dir="${tmp.dir}" />
