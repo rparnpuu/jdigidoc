@@ -49,7 +49,7 @@ You need the following dependent librarys to build jdigidoc:
 - bcpkix-jdk15on-151.jar - http://www.bouncycastle.org/latest_releases.html
 - bcprov-jdk15on-151.jar - http://www.bouncycastle.org/latest_releases.html
 - jakarta-log4j-1.2.6.jar - https://archive.apache.org/dist/jakarta/log4j/binaries/
-- iaikPkcs11Wrapper.jar - http://jce.iaik.tugraz.at/sic/Products/Core-Crypto-Toolkits/PKCS_11_Wrapper
+- iaikPkcs11Wrapper.jar version 1.2.16 or higher - http://jce.iaik.tugraz.at/sic/Products/Core-Crypto-Toolkits/PKCS_11_Wrapper
 
 Download them all to some directory and edit build.xml entry:
 
@@ -61,7 +61,7 @@ To build jdigidoc library use:
 
     ant jar
 
-This command also build jdcerts.jar that contains addition CA certificates for
+This command also build esteidtestcerts.jar that contains additional CA certificates for
 testing environments only.
 
 To build a zip file with dependent libs for distribution use
