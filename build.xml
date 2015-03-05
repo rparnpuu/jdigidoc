@@ -90,14 +90,21 @@
                           <include name="log4j.properties" />
                         </fileset>
                 </copy>
+				<copy todir="${tmp.dir}/doc">
+					<fileset dir="${doc.dir}" />
+				</copy>
+				<copy todir="${tmp.dir}">
+                        <fileset dir="${jdigidoc.dir}">
+						  <include name="RELEASE-NOTES.txt" />
+						  <include name="LICENSE.txt" />
+                        </fileset>
+                </copy>
+				<copy file="README.md" todir="${tmp.dir}"/>
 	</target>
 
 	<target name="init-libs" description="Make neccessary preparations">
 		<copy todir="${tmp.dir}/lib">
 			<fileset refid="jd-libs-and-bin"/>
-		</copy>
-		<copy todir="${tmp.dir}/doc">
-			<fileset dir="${doc.dir}" />
 		</copy>
 	</target>
 
