@@ -2906,7 +2906,7 @@ public class SAXDigiDocFactory
 				m_sbCollectChars.append(ConvertUtils.escapeTextNode(s));
 			}
 			if (m_sbCollectSignature != null)
-				m_sbCollectSignature.append(ConvertUtils.escapeXmlSymbols(s));
+				m_sbCollectSignature.append(ConvertUtils.escapeTextNode(s));
 			if(m_digest != null && m_bCollectDigest)
 			   updateDigest(s.getBytes());
 			if(m_altDigest != null && m_bCollectDigest)
