@@ -51,7 +51,8 @@ import java.util.Set;
 import java.util.Vector;
 import java.net.*;
 import java.io.*;
-
+import java.util.Random;
+import java.security.SecureRandom;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -110,6 +111,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     private PrivateKey m_signKey;
     private boolean m_bSignRequests;
     private Logger m_logger = null;
+    private static final Random RANDOM_GENERATOR = new SecureRandom();
     
     /** Creates new BouncyCastleNotaryFactory */
     public BouncyCastleNotaryFactory() {
@@ -117,6 +119,13 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         m_signKey = null;
         m_bSignRequests = false;
         m_logger = Logger.getLogger(BouncyCastleNotaryFactory.class);
+    }
+    
+    private byte[] createRandomBytes(int byteCount)
+    {
+      byte[] randomBytes = new byte[byteCount];
+      RANDOM_GENERATOR.nextBytes(randomBytes);
+      return randomBytes;
     }
     
     /**
@@ -518,7 +527,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             	m_logger.debug("Check CA cert: " + caCert.getSubjectDN().getName());
         	}
         	String strTime = new java.util.Date().toString();
-            byte[] nonce1 = SignedDoc.digest(strTime.getBytes()); // sha256?
+            byte[] nonce1 = SignedDoc.digest(createRandomBytes(32)); // sha256?
             OCSPReq req = createOCSPRequest(nonce1, cert, caCert, m_bSignRequests, false);
             //debugWriteFile("req1.der", req.getEncoded());
             if(m_logger.isDebugEnabled()) {
@@ -603,7 +612,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             	m_logger.debug("Check CA cert: " + caCert.getSubjectDN().getName());
         	}
         	String strTime = new java.util.Date().toString();
-            byte[] nonce1 = SignedDoc.digest(strTime.getBytes()); //sha256?
+            byte[] nonce1 = SignedDoc.digest(createRandomBytes(32)); //sha256?
         	//byte[] nonce1 = SignedDoc.digestOfType(strTime.getBytes(),
             //		sig.getSignedDoc().getFormat().equals(SignedDoc.FORMAT_BDOC) ? SignedDoc.SHA256_DIGEST_TYPE : SignedDoc.SHA1_DIGEST_TYPE);
             
@@ -707,7 +716,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             	m_logger.debug("Check CA cert: " + caCert.getSubjectDN().getName());
         	}
         	String strTime = new java.util.Date().toString();
-            byte[] nonce1 = SignedDoc.digest(strTime.getBytes()); // sha256?
+            byte[] nonce1 = SignedDoc.digest(createRandomBytes(32)); // sha256?
             OCSPReq req = createOCSPRequest(nonce1, cert, caCert, m_bSignRequests, false);
             //debugWriteFile("req1.der", req.getEncoded());
             if(m_logger.isDebugEnabled()) {
