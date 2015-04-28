@@ -622,6 +622,29 @@ public class DigiDocVerifyFactory {
 		return bOk;
 	}
 	
+	public static boolean verifySignatureFromLiveAndOcspFromTest(Signature sig, List lerrs)
+	{
+		boolean bOk = true;
+		if(m_logger.isDebugEnabled()) 
+        	m_logger.debug("Verifying live/test for signature: " + sig.getId());
+		X509Certificate cert = null, rCert = null;
+		CertValue cvOcsp = sig.getCertValueOfType(CertValue.CERTVAL_TYPE_RESPONDER);
+		if(sig != null && sig.getKeyInfo() != null && cvOcsp != null) {
+			cert = sig.getKeyInfo().getSignersCertificate();
+			rCert = cvOcsp.getCert();
+			if(cert != null && rCert != null && 
+		        	DigiDocGenFactory.isTestCard(rCert) &&
+		        	!DigiDocGenFactory.isTestCard(cert)) {
+		        	if(m_logger.isDebugEnabled())
+			        	m_logger.debug("Signer from LIVE CA-chain but OCSP from TEST CA-chain!");
+		            lerrs.add(new DigiDocException(DigiDocException.ERR_TEST_SIGNATURE, 
+		            		"Signer from LIVE CA-chain but OCSP from TEST CA-chain!", null));
+		            bOk = false;
+			}
+		}
+		return bOk;
+	}
+	
 	/**
 	 * Verifies OCSP confirmation for signature
 	 * @param sig Signature object
@@ -663,15 +686,7 @@ public class DigiDocVerifyFactory {
 		                    "No notarys certificate!", null));
 		        	return false;
 		        }
-		        if(cert != null && rCert != null && 
-		        	DigiDocGenFactory.isTestCard(rCert) &&
-		        	!DigiDocGenFactory.isTestCard(cert)) {
-		        	if(m_logger.isDebugEnabled())
-			        	m_logger.debug("Signer from LIVE CA-chain but OCSP from TEST CA-chain!");
-		            lerrs.add(new DigiDocException(DigiDocException.ERR_TEST_SIGNATURE, 
-		            		"Signer from LIVE CA-chain but OCSP from TEST CA-chain!", null));
-		            bOk = false;
-		        }
+		        // signer/ocsp live/test verification moved to utility
 		        if(!rCert.getSerialNumber().equals(sSerial) &&
 		        	!sig.getSignedDoc().getFormat().equals(SignedDoc.FORMAT_BDOC)) {
 		        	if(m_logger.isDebugEnabled())
