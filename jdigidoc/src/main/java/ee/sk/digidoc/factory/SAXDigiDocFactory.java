@@ -423,7 +423,7 @@ public class SAXDigiDocFactory
 				ArrayList lSigFnames = new ArrayList();
 				ArrayList lDataFnames = new ArrayList();
 				// read all entries
-				boolean bHasMimetype = false;
+				boolean bHasMimetype = false, bManifest1 = false;
 				int nFil = 0;
 				while((zf != null && eFiles.hasMoreElements()) ||
 					  (zis != null && ((ze = zis.getNextZipEntry()) != null)) ) {
@@ -485,8 +485,15 @@ public class SAXDigiDocFactory
 					} else if(ze.getName().equals(FILE_MANIFEST)) { // manifest.xml file
 						if(m_logger.isDebugEnabled())
 							m_logger.debug("Read manifest");
-						BdocManifestParser mfparser = new BdocManifestParser(m_doc);
-						mfparser.readManifest(isEntry);
+						if(!bManifest1) {
+						  bManifest1 = true;
+						  BdocManifestParser mfparser = new BdocManifestParser(m_doc);
+						  mfparser.readManifest(isEntry);
+						} else {
+							m_logger.error("Found multiple manifest.xml files!");
+							throw new DigiDocException(DigiDocException.ERR_MULTIPLE_MANIFEST_FILES,
+									"Found multiple manifest.xml files!", null);
+						}
 					} else if(ze.getName().startsWith(FILE_SIGNATURES) &&
 							  ze.getName().endsWith(".xml")) { // some signature
 						m_fileName = ze.getName();
