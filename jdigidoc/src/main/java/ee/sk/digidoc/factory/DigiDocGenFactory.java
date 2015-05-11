@@ -292,6 +292,8 @@ public class DigiDocGenFactory {
         		  si.setSignatureMethod(sSigMeth);
         		else
         			throw new DigiDocException(DigiDocException.ERR_DIGEST_ALGORITHM, "Invalid digest type: " + dType, null);
+        		if(sDigType == null)
+        			sDigType = dType;
         	}
           }
         }
