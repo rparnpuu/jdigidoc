@@ -104,8 +104,8 @@
 	
 
 	<target name="travis-compile" description="Compile with downloading jars and without ver change" depends="travis-libs,init,travis-init-libs">
-		<javac destdir="${classes.dir}" target="1.5" debug="true"
-                        deprecation="false" optimize="false" failonerror="true" encoding="UTF-8" source="1.5">
+		<javac destdir="${classes.dir}" target="1.6" debug="true"
+                        deprecation="false" optimize="false" failonerror="true" encoding="UTF-8" source="1.6">
                         <src path="${src.dir}" />
                         <src path="${test.dir}" />
                         <classpath refid="travis-classpath" />
