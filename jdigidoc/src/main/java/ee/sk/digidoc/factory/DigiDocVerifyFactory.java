@@ -564,7 +564,8 @@ public class DigiDocVerifyFactory {
 		        	  }
 	        	  }
 	        	  if(!bF) {
-	        		  m_logger.error("Different for signed: " + r1.getId() + "/" + r1.getValue());
+	        		  if(m_logger.isDebugEnabled()) 
+	  		            m_logger.debug("Different for signed: " + r1.getId() + "/" + r1.getValue());
 	        	  } 
 	        	  if(!bF && r1.getId() != null && 
 	        		(r1.getId().equals("CN") ||
