@@ -1053,12 +1053,12 @@ public class DigiDocVerifyFactory {
 			      id.getUri().equals(DigiDocGenFactory.BDOC_210_OID)) { // has bdoc 2.0 nonce policy
 			    bOk = true;
 			    // check policy hash
-			    if(!compareDigests(sig.getSignedProperties().getSignaturePolicyIdentifier().getSignaturePolicyId().getDigestValue(),
-			    		Base64Util.decode(DigiDocGenFactory.BDOC_210_DIGEST_VALUE))) {
+			    if(sig.getSignedProperties().getSignaturePolicyIdentifier().getSignaturePolicyId().getDigestValue() == null || 
+			       sig.getSignedProperties().getSignaturePolicyIdentifier().getSignaturePolicyId().getDigestValue().length == 0) {
 			    	if(m_logger.isDebugEnabled()) 
-	            		m_logger.debug("Signature: " + sig.getId() + " has invalid signature policy hash: " + Base64Util.encode(sig.getSignedProperties().getSignaturePolicyIdentifier().getSignaturePolicyId().getDigestValue()));
+	            		m_logger.debug("Signature: " + sig.getId() + " has no signature policy hash");
 					lerrs.add(new DigiDocException(DigiDocException.ERR_NONCE_POLICY_HASH,
-							   "Signature: " + sig.getId() + " has invalid signature policy hash: " + Base64Util.encode(sig.getSignedProperties().getSignaturePolicyIdentifier().getSignaturePolicyId().getDigestValue()), null));
+							   "Signature: " + sig.getId() + " has invalid signature policy hash", null));
 			    }
 			    // check policy uri
 			    boolean bUriOk = false;
