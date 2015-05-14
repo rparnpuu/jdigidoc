@@ -1134,6 +1134,18 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 			" verify using: " + ((cert != null) ? ConvertUtils.getCommonName(cert.getSubjectDN().getName()) : "NULL") +
                 			" verify: " + bOk);
             	}
+            	if(bOk) {
+            		CertValue cvOcsp = sig.getCertValueOfType(CertValue.CERTVAL_TYPE_RESPONDER);
+            		X509Certificate rCert = cvOcsp.getCert();
+            		if(rCert != null) {
+            			X509CertificateHolder ch = new X509CertificateHolder(rCert.getEncoded());
+                		bOk = basResp.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(ch));
+                		if(m_logger.isDebugEnabled())
+                			m_logger.debug("OCSP resp: " + ((basResp != null) ? responderIDtoString(basResp) : "NULL") +
+                    			" verify using cert in xml: " + ((rCert != null) ? ConvertUtils.getCommonName(rCert.getSubjectDN().getName()) : "NULL") +
+                    			" verify: " + bOk);
+            		}
+            	}
                 if(!bOk)
                   throw new DigiDocException(DigiDocException.ERR_OCSP_VERIFY, "OCSP verification error!", null);
             } catch (Exception ex) {
