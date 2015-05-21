@@ -526,7 +526,6 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             	m_logger.debug("Check cert: " + cert.getSubjectDN().getName());            	
             	m_logger.debug("Check CA cert: " + caCert.getSubjectDN().getName());
         	}
-        	String strTime = new java.util.Date().toString();
             byte[] nonce1 = SignedDoc.digest(createRandomBytes(32)); // sha256?
             OCSPReq req = createOCSPRequest(nonce1, cert, caCert, m_bSignRequests, false);
             //debugWriteFile("req1.der", req.getEncoded());
@@ -610,10 +609,10 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         		m_logger.debug("Find CA for: " + SignedDoc.getCommonName(ConvertUtils.convX509Name(cert.getIssuerX500Principal())));
             	m_logger.debug("Check cert: " + cert.getSubjectDN().getName());            	
             	m_logger.debug("Check CA cert: " + caCert.getSubjectDN().getName());
-        	}
-        	String strTime = new java.util.Date().toString();
+        	}  	
             byte[] nonce1 = SignedDoc.digest(createRandomBytes(32)); //sha256?
-        	//byte[] nonce1 = SignedDoc.digestOfType(strTime.getBytes(),
+        	//String strTime = new java.util.Date().toString();
+            //byte[] nonce1 = SignedDoc.digestOfType(strTime.getBytes(),
             //		sig.getSignedDoc().getFormat().equals(SignedDoc.FORMAT_BDOC) ? SignedDoc.SHA256_DIGEST_TYPE : SignedDoc.SHA1_DIGEST_TYPE);
             
             bosNonce.write(nonce1);
@@ -715,7 +714,6 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             	m_logger.debug("Check cert: " + cert.getSubjectDN().getName());            	
             	m_logger.debug("Check CA cert: " + caCert.getSubjectDN().getName());
         	}
-        	String strTime = new java.util.Date().toString();
             byte[] nonce1 = SignedDoc.digest(createRandomBytes(32)); // sha256?
             OCSPReq req = createOCSPRequest(nonce1, cert, caCert, m_bSignRequests, false);
             //debugWriteFile("req1.der", req.getEncoded());
