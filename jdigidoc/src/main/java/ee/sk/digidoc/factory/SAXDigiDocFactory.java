@@ -2864,8 +2864,18 @@ public class SAXDigiDocFactory
 						if(ref != null) {
 							for(int d = 0; d < sig.getSignedDoc().countDataFiles(); d++) {
 								DataFile df = sig.getSignedDoc().getDataFile(d);
-								if(df.getFileName().equals(ref.getUri())) {
+								if(df.getFileName() != null && df.getFileName().length() > 1 &&
+										ref.getUri() != null && ref.getUri().length() > 1) {
+								  // normalize uri and filename
+								  String sFileName = df.getFileName();
+								  if(sFileName.charAt(0) == '/')
+									sFileName = sFileName.substring(1);
+								  String sUri = ref.getUri();
+								  if(sUri.charAt(0) == '/')
+									sUri = sUri.substring(1);
+								  if(sFileName.equals(sUri)) {
 									df.setMimeType(m_sbCollectItem.toString());
+								  }
 								}
 							}
 						}
