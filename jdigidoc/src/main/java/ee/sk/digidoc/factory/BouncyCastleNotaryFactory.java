@@ -277,8 +277,9 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             resp = sendRequestToUrl(req, ocspUrl, httpFrom, format, formatVer);
             //debugWriteFile("resp.der", resp.getEncoded());
             if(m_logger.isDebugEnabled())
-                m_logger.debug("RESPONSE:\n" + Base64Util.encode(resp.getEncoded(), 0));
+                m_logger.debug("RESPONSE:\n" + ((resp != null) ? Base64Util.encode(resp.getEncoded(), 0) : "NULL"));
             // check response status
+            if(resp != null)
             verifyRespStatus(resp);
             // check the result
             not = parseAndVerifyResponse(sig, notId, signersCert, resp, nonce, notaryCert, caCert);
@@ -343,8 +344,10 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         X509Certificate signersCert, X509Certificate caCert) 
         throws DigiDocException 
     {
-    	
-        Notary not = null;
+    	Notary not = null;
+        if(sig == null) {
+    		throw new DigiDocException(DigiDocException.ERR_INPUT_VALUE, "Signature is NULL for ocsp request!", null);
+    	}
         try {
         	String notId = sig.getId().replace('S', 'N');
             // calculate the nonce
@@ -399,7 +402,11 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     {
     	
         Notary not = null;
+        if(sig == null) {
+    		throw new DigiDocException(DigiDocException.ERR_INPUT_VALUE, "Signature is NULL for ocsp request!", null);
+    	}
         try {
+        	
         	String notId = sig.getId().replace('S', 'N');
             // calculate the nonce
         	// TODO: sha256?
@@ -409,9 +416,10 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         	if(notaryCert == null && sig.getUnsignedProperties() != null)
             	notaryCert = sig.getUnsignedProperties().getRespondersCertificate();
             // check the result
+        	
             not = getConfirmation(sig, nonce, signersCert, caCert, notaryCert, notId, ocspUrl, 
             		sig.getHttpFrom(), sig.getSignedDoc().getFormat(), sig.getSignedDoc().getVersion());
-            if(sig != null && not != null && sig.getUnsignedProperties() != null)
+            if(not != null && sig.getUnsignedProperties() != null)
             	sig.getUnsignedProperties().setNotary(not);
             // add cert to signature
             if(notaryCert == null && sig != null && sig.getUnsignedProperties() != null && sig.getUnsignedProperties().getNotary() != null) {
@@ -526,7 +534,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             	m_logger.debug("Check cert: " + cert.getSubjectDN().getName());            	
             	m_logger.debug("Check CA cert: " + caCert.getSubjectDN().getName());
         	}
-            byte[] nonce1 = SignedDoc.digest(createRandomBytes(32)); // sha256?
+        	byte[] nonce1 = SignedDoc.digest(createRandomBytes(32)); // sha256?
             OCSPReq req = createOCSPRequest(nonce1, cert, caCert, m_bSignRequests, false);
             //debugWriteFile("req1.der", req.getEncoded());
             if(m_logger.isDebugEnabled()) {
@@ -538,7 +546,8 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             resp = sendRequestToUrl(req, ocspUrl, httpFrom, null, null);
             //debugWriteFile("resp1.der", resp.getEncoded());
             if(m_logger.isDebugEnabled()) {
-                m_logger.debug("Got ocsp response: " + resp.getEncoded().length + " bytes");
+                m_logger.debug("Got ocsp response: " + ((resp != null) ? resp.getEncoded().length : 0) + " bytes");
+                if(resp != null)
                 m_logger.debug("RESPONSE:\n" + Base64Util.encode(resp.getEncoded(), 0));
             }
             // check response status
@@ -609,10 +618,9 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         		m_logger.debug("Find CA for: " + SignedDoc.getCommonName(ConvertUtils.convX509Name(cert.getIssuerX500Principal())));
             	m_logger.debug("Check cert: " + cert.getSubjectDN().getName());            	
             	m_logger.debug("Check CA cert: " + caCert.getSubjectDN().getName());
-        	}  	
-            byte[] nonce1 = SignedDoc.digest(createRandomBytes(32)); //sha256?
-        	//String strTime = new java.util.Date().toString();
-            //byte[] nonce1 = SignedDoc.digestOfType(strTime.getBytes(),
+        	}
+        	byte[] nonce1 = SignedDoc.digest(createRandomBytes(32)); //sha256?
+        	//byte[] nonce1 = SignedDoc.digestOfType(strTime.getBytes(),
             //		sig.getSignedDoc().getFormat().equals(SignedDoc.FORMAT_BDOC) ? SignedDoc.SHA256_DIGEST_TYPE : SignedDoc.SHA1_DIGEST_TYPE);
             
             bosNonce.write(nonce1);
@@ -714,7 +722,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             	m_logger.debug("Check cert: " + cert.getSubjectDN().getName());            	
             	m_logger.debug("Check CA cert: " + caCert.getSubjectDN().getName());
         	}
-            byte[] nonce1 = SignedDoc.digest(createRandomBytes(32)); // sha256?
+        	byte[] nonce1 = SignedDoc.digest(createRandomBytes(32)); // sha256?
             OCSPReq req = createOCSPRequest(nonce1, cert, caCert, m_bSignRequests, false);
             //debugWriteFile("req1.der", req.getEncoded());
             if(m_logger.isDebugEnabled()) {
@@ -909,7 +917,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             if(m_logger.isDebugEnabled()) {
             	m_logger.debug("CA cert: " + ((caCert != null) ? caCert.getSubjectDN().getName() : "NULL"));
             	m_logger.debug("RESP: " + basResp);
-            	m_logger.debug("CERT: " + ((cert != null) ? cert.getSubjectDN().getName() : "NULL") + 
+            	m_logger.debug("CERT: " + cert.getSubjectDN().getName() + 
             				" ISSUER: " + ConvertUtils.convX509Name(cert.getIssuerX500Principal()) +
             				" nr: " + ((caCert != null) ? ConvertUtils.bin2hex(caCert.getSerialNumber().toByteArray()) : "NULL"));
             }
@@ -1003,9 +1011,11 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             	  m_logger.debug("CA CERT: " + caCert.getSubjectDN().getName());
             }
             SingleResp[] sresp = basResp.getResponses();
-            CertificateID rc = creatCertReq(cert, caCert);
+            CertificateID rc = null;
+            if(cert != null && caCert != null)
+            rc = creatCertReq(cert, caCert);
             //ertificateID certId = creatCertReq(signersCert, caCert);
-            if(m_logger.isDebugEnabled())
+            if(m_logger.isDebugEnabled() && rc != null)
                 m_logger.debug("Search alg: " + rc.getHashAlgOID() + 
             	" serial: " + rc.getSerialNumber() + " issuer: " + Base64Util.encode(rc.getIssuerKeyHash()) +
             	" subject: " + Base64Util.encode(rc.getIssuerNameHash()));
@@ -1018,7 +1028,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             			" serial: " + id.getSerialNumber() + 
             			" issuer: " + Base64Util.encode(id.getIssuerKeyHash()) +
             			" subject: " + Base64Util.encode(id.getIssuerNameHash()));
-            		if(rc.getHashAlgOID().equals(id.getHashAlgOID()) &&
+            		if(rc != null && rc.getHashAlgOID().equals(id.getHashAlgOID()) &&
             			rc.getSerialNumber().equals(id.getSerialNumber()) &&
             			SignedDoc.compareDigests(rc.getIssuerKeyHash(), id.getIssuerKeyHash()) &&
             			SignedDoc.compareDigests(rc.getIssuerNameHash(), id.getIssuerNameHash())) {
@@ -1125,8 +1135,10 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             		if(m_logger.isDebugEnabled())
             			m_logger.debug("Verify using responders cert: " + 
             					((cert != null) ? ConvertUtils.getCommonName(cert.getSubjectDN().getName()) + " nr: " + cert.getSerialNumber().toString() : "NULL"));
+            		if(cert != null) {
             		X509CertificateHolder ch = new X509CertificateHolder(cert.getEncoded());
             		bOk = basResp.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(ch));
+            		} else bOk = false;
             		if(m_logger.isDebugEnabled())
             			m_logger.debug("OCSP resp: " + ((basResp != null) ? responderIDtoString(basResp) : "NULL") +
                 			" verify using: " + ((cert != null) ? ConvertUtils.getCommonName(cert.getSubjectDN().getName()) : "NULL") +
@@ -1134,14 +1146,16 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             	}
             	if(bOk) {
             		CertValue cvOcsp = sig.getCertValueOfType(CertValue.CERTVAL_TYPE_RESPONDER);
-            		X509Certificate rCert = cvOcsp.getCert();
-            		if(rCert != null) {
+            		if(cvOcsp != null) {
+            		  X509Certificate rCert = cvOcsp.getCert();
+            		  if(rCert != null) {
             			X509CertificateHolder ch = new X509CertificateHolder(rCert.getEncoded());
                 		bOk = basResp.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(ch));
                 		if(m_logger.isDebugEnabled())
                 			m_logger.debug("OCSP resp: " + ((basResp != null) ? responderIDtoString(basResp) : "NULL") +
-                    			" verify using cert in xml: " + ((rCert != null) ? ConvertUtils.getCommonName(rCert.getSubjectDN().getName()) : "NULL") +
+                    			" verify using cert in xml: " + ConvertUtils.getCommonName(rCert.getSubjectDN().getName()) +
                     			" verify: " + bOk);
+            		  }
             		}
             	}
                 if(!bOk)
@@ -1177,8 +1191,9 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 	m_logger.debug("DDOC ver: " + sig.getSignedDoc().getVersion() + 
             			" SIG: " + sig.getId() + " NOT: " + not.getId() +
             			" Real nonce: " + ((nonce2 != null) ? Base64Util.encode(nonce2, 0) : "NULL") + " noncelen: " + ((nonce2 != null) ? nonce2.length : 0)
-            			+ " SigVal hash: " + Base64Util.encode(nonce1, 0)
-            			+ " SigVal hash hex: " + ConvertUtils.bin2hex(nonce1) + " svlen: " + ((nonce1 != null) ? nonce1.length : 0));
+            			+ " SigVal hash: " + ((nonce1 != null) ? Base64Util.encode(nonce1, 0) : "NULL")
+            			+ " SigVal hash hex: " + ((nonce1 != null) ? ConvertUtils.bin2hex(nonce1) : "NULL")
+            			+ " svlen: " + ((nonce1 != null) ? nonce1.length : 0));
                 	//m_logger.debug("SIG:\n---\n" + sig.toString() + "\n--\n");
             	  }
                   throw new DigiDocException(DigiDocException.ERR_OCSP_NONCE,
@@ -1383,7 +1398,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
 			if(nonce != null && ConvertUtils.findDigType(nonce) == null && bBdoc) {
 				byte[] b = ConvertUtils.addDigestAsn1Prefix(nonce);
 				if(m_logger.isDebugEnabled())
-			    	  m_logger.debug("Nonce in: " + ConvertUtils.bin2hex(nonce) + " in-len: " + ((nonce != null) ? nonce.length : 0) +
+			    	  m_logger.debug("Nonce in: " + ConvertUtils.bin2hex(nonce) + " in-len: " + nonce.length +
 			    			  " with-asn1: " + ConvertUtils.bin2hex(b) + " out-len: " + ((b != null) ? b.length : 0) + " out-pref: " + ConvertUtils.findDigType(b));
 				nonce = b;
 			}
@@ -1566,6 +1581,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     public void init()
         throws DigiDocException 
     {
+    	FileInputStream fi = null;
         try {
             String proxyHost = ConfigManager.instance().
                 getProperty("DIGIDOC_PROXY_HOST");
@@ -1596,7 +1612,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             	String p12serial = ConfigManager.instance().
                 	getProperty("DIGIDOC_OCSP_SIGN_CERT_SERIAL");
             	if(p12file != null && p12paswd != null) {
-                	FileInputStream fi = new FileInputStream(p12file);
+                	fi = new FileInputStream(p12file);
                 	KeyStore store = KeyStore.getInstance("PKCS12", "BC");
                 	store.load(fi, p12paswd.toCharArray());
                 	java.util.Enumeration en = store.aliases();
@@ -1628,6 +1644,15 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                      
         } catch(Exception ex) {
             DigiDocException.handleException(ex, DigiDocException.ERR_NOT_FAC_INIT);
+        } finally {
+        	if(fi != null) {
+        		try {
+        			fi.close();
+        			fi = null;
+        		} catch(Exception ex2) {
+        			m_logger.error("Error closing input stream: " + ex2);
+        		}
+        	}
         }
     }
     

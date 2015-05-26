@@ -138,6 +138,10 @@ public class DigiDocStructureValidator {
 	public static DigiDocException validateElementPath(XmlElemInfo ePath)
 	{
 		DigiDocException ex = null;
+		if(ePath == null) {
+			ex = new DigiDocException(DigiDocException.ERR_PARSE_XML, "Null path!", null);
+			return ex;
+		}
 		String sPath = ePath.getPath(true);
 		String sRoot = ePath.getRootTag();
 		XmlElemDef eCurr = null, eRoot = null;

@@ -793,7 +793,7 @@ public class SignedDoc implements Serializable
         		ZipArchiveOutputStream zos = new ZipArchiveOutputStream(os);
         		zos.setEncoding("UTF-8");
         		if(m_logger.isDebugEnabled())
-        			m_logger.debug("OS: " + ((os != null) ? "OK" : "NULL") + " zos: " + ((zos != null) ? "OK" : "NULL"));
+        			m_logger.debug("OS: " + ((os != null) ? "OK" : "NULL"));
         		// write mimetype
         		if(m_logger.isDebugEnabled())
         			m_logger.debug("Writing: " + MIMET_FILE_NAME);
@@ -1663,16 +1663,26 @@ public class SignedDoc implements Serializable
     public static boolean writeCertificate(X509Certificate cert, File certFile)
         throws DigiDocException
     {
+    	FileOutputStream fos = null;
         try {
-        	FileOutputStream fos = new FileOutputStream(certFile);
+        	fos = new FileOutputStream(certFile);
         	fos.write(PEM_HDR1.getBytes());
         	fos.write(Base64Util.encode(cert.getEncoded()).getBytes());
         	fos.write(PEM_HDR2.getBytes());
         	fos.close();
+        	fos = null;
         	//byte[] data = readFile(certFile);
             //cert = readCertificate(data);
         } catch(Exception ex) {
             DigiDocException.handleException(ex, DigiDocException.ERR_READ_FILE);
+        } finally {
+        	if(fos != null) {
+        		try {
+        			fos.close();
+        		} catch(Exception ex2) {
+        			m_logger.error("Error closing streams: " + ex2);
+        		}
+        	}
         }
         return false;
     }
@@ -1691,8 +1701,8 @@ public class SignedDoc implements Serializable
         throws DigiDocException
     {
         X509Certificate cert = null;
+        InputStream isCert = null;
         try {
-        	InputStream isCert = null;
             URL url = null;
             if(certLocation.startsWith("http")) {
                 url = new URL(certLocation);
@@ -1706,8 +1716,17 @@ public class SignedDoc implements Serializable
             CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
       		cert = (X509Certificate)certificateFactory.generateCertificate(isCert);
       		isCert.close();
+      		isCert = null;
         } catch(Exception ex) {
             DigiDocException.handleException(ex, DigiDocException.ERR_READ_FILE);
+        } finally {
+        	if(isCert != null) {
+        		try {
+        			isCert.close();
+        		} catch(Exception ex2) {
+        			m_logger.error("Error closing streams: " + ex2);
+        		}
+        	}
         }
         return cert;
     }

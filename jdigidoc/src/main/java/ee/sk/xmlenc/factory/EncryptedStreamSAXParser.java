@@ -366,6 +366,7 @@ public class EncryptedStreamSAXParser
 				m_logger.debug("Loading pkcs12 keystore: " + pkcs12Keystore);
 			pfac.load(pkcs12Keystore, tokenType, pin);
 		}
+    	if(m_sigFac != null)
     	m_decCert = m_sigFac.getAuthCertificate(token, pin);
      } catch(Exception ex) {
     	 m_logger.error("Error loading decryption cert: " + ex);
@@ -843,7 +844,7 @@ public class EncryptedStreamSAXParser
       // decrypt the data
       decdata = m_cipher.update(encdata);
       if(m_logger.isDebugEnabled()) 
-        m_logger.debug("Decrypted input: " + ((indata != null) ? indata.length() : 0) + " decoded: " +
+        m_logger.debug("Decrypted input: " + indata.length() + " decoded: " +
                        ((encdata != null) ? encdata.length : 0) +
                        " decrypted: " + ((decdata != null) ? decdata.length : 0));
       if(m_totalDecrypted == 0 && decdata != null && decdata.length > 16) {
@@ -864,7 +865,7 @@ public class EncryptedStreamSAXParser
     		  System.arraycopy(decdata, 0, ddata, n1, n2);
     	  decdata = ddata;
     	  if(m_logger.isDebugEnabled())
-    	    m_logger.debug("Last block: " + ((decdata != null) ? decdata.length : 0));
+    	    m_logger.debug("Last block: " + decdata.length);
     	  m_lblock = null;
       }
       // remove padding on the last block

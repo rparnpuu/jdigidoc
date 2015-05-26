@@ -127,8 +127,10 @@ public class DigiDocServiceFactory
             OutputStream os = con.getOutputStream();
             if(m_logger.isDebugEnabled())
 	    		m_logger.debug("OS: " + ((os != null) ? "OK" : "NULL"));
+            if(os != null) {
             os.write(msg.getBytes("UTF-8"));
             os.close();
+            }
             if(m_logger.isDebugEnabled())
 	    		m_logger.debug("Wrote: " + msg.length());
             // read the response
@@ -158,7 +160,7 @@ public class DigiDocServiceFactory
             is.close();
             if(m_logger.isDebugEnabled())
 	    		m_logger.debug("Received: " + ((bresp != null) ? bresp.length : 0) + " bytes");
-            String resp = new String(bresp, "UTF-8");
+            String resp = ((bresp != null) ? new String(bresp, "UTF-8") : null);
             return resp;
     	} catch(Exception ex) {
     		m_logger.error("Soap error: " + ex);

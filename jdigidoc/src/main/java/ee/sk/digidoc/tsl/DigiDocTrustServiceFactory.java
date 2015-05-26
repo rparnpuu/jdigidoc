@@ -81,7 +81,7 @@ public class DigiDocTrustServiceFactory
     				TSPService tsps = null;
     				try {
     				  X509Certificate cert = readCertificate(certLoc);
-    				  if(cert != null) {
+    				  if(cert != null && tsp != null) {
     				    tsps = addOcspTspService(tsp, cert,
     						cfg.getStringProperty("DIGIDOC_CA_" + c + "_OCSP" + n + "_CN", null),
     						cfg.getStringProperty("DIGIDOC_CA_" + c + "_OCSP" + n + "_URL", null),

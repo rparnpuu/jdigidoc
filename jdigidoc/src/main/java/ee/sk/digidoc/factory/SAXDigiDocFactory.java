@@ -404,6 +404,7 @@ public class SAXDigiDocFactory
 		ZipFile zf = null;
 		ZipArchiveInputStream zis = null;
 		ZipArchiveEntry ze = null;
+		InputStream isEntry = null;
 		File fTmp = null;
 		try {
 			factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
@@ -428,7 +429,6 @@ public class SAXDigiDocFactory
 				while((zf != null && eFiles.hasMoreElements()) ||
 					  (zis != null && ((ze = zis.getNextZipEntry()) != null)) ) {
 					nFil++;
-					InputStream isEntry = null;
 					
 					// read entry
 					if(zf != null) { // ZipFile
@@ -560,6 +560,7 @@ public class SAXDigiDocFactory
 							//m_doc.addDataFile(df); // this does some intiailization work unnecessary here
 						}
 						// enable caching if requested
+						if(isEntry != null)
 						df.setOrCacheBodyAndCalcHashes(isEntry);
 						df.setComment(ze.getComment());
 						df.setLastModDt(new Date(ze.getTime()));
@@ -628,6 +629,10 @@ public class SAXDigiDocFactory
 			handleError(ex);
 		} finally { // cleanup
 			try {
+			  if(isEntry != null) {
+				isEntry.close();
+				isEntry = null;
+			  }
 			  if(zis != null)
 				zis.close();
 			  if(zf != null)
@@ -2369,6 +2374,7 @@ public class SAXDigiDocFactory
 					Reference spRef = sig.getSignedInfo().getReferenceForSignedProperties(sp);
 					if(spRef != null) {
 					  String sDigType = ConfigManager.digAlg2Type(spRef.getDigestAlgorithm());
+					  if(sDigType != null)
 					  sp.setOrigDigest(SignedDoc.digestOfType(bCanProp, sDigType));
 					  if(m_logger.isDebugEnabled())
 						m_logger.debug("\nHASH: " + Base64Util.encode(sp.getOrigDigest()) + " REF-HASH: " + Base64Util.encode(spRef.getDigestValue()));
@@ -2392,6 +2398,7 @@ public class SAXDigiDocFactory
 				if(m_doc.getFormat().equals(SignedDoc.FORMAT_DIGIDOC_XML) || 
 					m_doc.getFormat().equals(SignedDoc.FORMAT_SK_XML)) {
 				  String sDigType1 = ConfigManager.digAlg2Type(sp.getCertDigestAlgorithm());
+				  if(sDigType1 != null)
 				  sp.setOrigDigest(SignedDoc.digestOfType(bCanProp, sDigType1));
 				  if(m_logger.isDebugEnabled())
 					m_logger.debug("SigProp2:\n------\n" + new String(bCanProp) + "\n------\n"  + 

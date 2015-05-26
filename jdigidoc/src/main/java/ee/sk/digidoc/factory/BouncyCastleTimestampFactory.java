@@ -241,8 +241,10 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
             OutputStream os = con.getOutputStream();
             if(m_logger.isDebugEnabled())
 	    		m_logger.debug("OS: " + ((os != null) ? "OK" : "NULL"));
+            if(os != null) {
             os.write(req.getEncoded());
             os.close();
+            }
             if(m_logger.isDebugEnabled())
 	    		m_logger.debug("Wrote: " + req.getEncoded().length);
             // read the response
@@ -272,8 +274,8 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
             is.close();
             if(m_logger.isDebugEnabled())
 	    		m_logger.debug("Received: " + ((bresp != null) ? bresp.length : 0) + " bytes");
-            TimeStampResponse resp = new TimeStampResponse(bresp);
-            if(m_logger.isDebugEnabled() && resp.getTimeStampToken() != null && resp.getTimeStampToken().getTimeStampInfo() != null)
+            TimeStampResponse resp = ((bresp != null) ? new TimeStampResponse(bresp) : null);
+            if(m_logger.isDebugEnabled() && resp != null && resp.getTimeStampToken() != null && resp.getTimeStampToken().getTimeStampInfo() != null)
 	    		m_logger.debug("TS resp: " + resp.getTimeStampToken().getTimeStampInfo().getSerialNumber().toString() + " msg-imprint: " + Base64Util.encode(resp.getTimeStampToken().getTimeStampInfo().getMessageImprintDigest()));
             
             return resp;

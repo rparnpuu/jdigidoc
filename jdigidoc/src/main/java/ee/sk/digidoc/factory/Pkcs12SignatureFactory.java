@@ -50,16 +50,26 @@ public class Pkcs12SignatureFactory
     public boolean load(String storeName, String storeType, String passwd)
     throws DigiDocException
     {
+    	FileInputStream fis = null;
     	try {
     		if(m_logger.isDebugEnabled())
     			m_logger.debug("Load store: " + storeName + " type: " + storeType);
     		m_keyStore = KeyStore.getInstance(storeType);
     		if(m_keyStore != null) {
-    			m_keyStore.load(new FileInputStream(storeName), passwd.toCharArray());
+    			m_keyStore.load(fis = new FileInputStream(storeName), passwd.toCharArray());
     			return true;
     		}
     	} catch(Exception ex) {
     		m_logger.error("Error loading store: " + storeName + " - " + ex);
+    	} finally {
+    		if(fis != null) {
+    			try {
+    				fis.close();
+    				fis = null;
+    			} catch(Exception ex2) {
+    				m_logger.error("Error closing pkcs12: " + storeName + " - " + ex2);
+    			}
+    		}
     	}
     	return false;
     }
@@ -209,8 +219,8 @@ public class Pkcs12SignatureFactory
     		instance.initSign((PrivateKey)key);
     		instance.update(xml);
     		byte[] signature = instance.sign();
-    		if(m_logger.isDebugEnabled())
-    			m_logger.debug("Signature len: " + ((signature != null) ? signature.length : 0) + "\n---\n sig: " + ConvertUtils.bin2hex(signature));
+    		if(m_logger.isDebugEnabled() && signature != null)
+    			m_logger.debug("Signature len: " + signature.length + "\n---\n sig: " + ConvertUtils.bin2hex(signature));
     		return signature;
     	} catch(DigiDocException ex) {
     		m_logger.error("DigiDoc Error signing: " + ex);

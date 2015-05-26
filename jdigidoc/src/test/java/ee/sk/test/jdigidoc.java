@@ -276,6 +276,7 @@ public class jdigidoc {
 								  keystoreFile = cfg.getProperty("DIGIDOC_KEYSTORE_FILE");
 							  if(pin == null || pin.trim().length() == 0)
 								  pin = cfg.getProperty("DIGIDOC_KEYSTORE_PASSWD");
+							  if(p12sfac != null)
 							  bOk = p12sfac.load(keystoreFile, SignatureFactory.SIGFAC_TYPE_PKCS12, pin);
 							} else {
 								System.err.println("No signature factory of type: " + sImpl);
@@ -283,7 +284,7 @@ public class jdigidoc {
 							}
 						} else {
 							sigFac = cfg.getSignatureFactory();
-							if(sigFac.getType().equals(SignatureFactory.SIGFAC_TYPE_PKCS12)) {
+							if(sigFac != null && sigFac.getType().equals(SignatureFactory.SIGFAC_TYPE_PKCS12)) {
 								  Pkcs12SignatureFactory p12sfac = (Pkcs12SignatureFactory)sigFac;
 								  if(keystoreFile == null || keystoreFile.trim().length() == 0)
 									  keystoreFile = cfg.getProperty("DIGIDOC_KEYSTORE_FILE");
@@ -297,7 +298,13 @@ public class jdigidoc {
 							return bOk;
 						}
 						System.out.println("GET Cert in slot: " + nSlot + " cmd-profile: " + profile);
-						X509Certificate cert = sigFac.getCertificate(nSlot, pin);
+						X509Certificate cert = null;
+						if(sigFac != null)
+						  cert = sigFac.getCertificate(nSlot, pin);
+						if(cert == null) {
+							System.out.println("Failed to load signers certificate!");
+							return bOk;
+						}
 						if(profile == null)
 							profile = m_sdoc.getProfile();
 						if(profile != null && (m_sdoc.getProfile() == null || !m_sdoc.getProfile().equals(profile))) {
@@ -330,7 +337,7 @@ public class jdigidoc {
 						  sidigest = sig.calculateSignedInfoXML();
 						System.out.println("Create signature, cert: " + ((cert != null) ? "OK" : "NULL") + " status: " + bOk + " sig-profile: " + sig.getProfile());
 						
-						byte[] sigval = sigFac.sign(sidigest, nSlot, pin, sig);
+						byte[] sigval = ((sidigest != null) ? sigFac.sign(sidigest, nSlot, pin, sig) : null);
 						// finalize signature up to default profile
 						System.out.println("Finalize signature: " + sig.getId() + " profile: " + sig.getProfile() + " sig-len: " + ((sigval != null) ? sigval.length : 0));
 						sig.setSignatureValue(sigval);
@@ -449,9 +456,12 @@ public class jdigidoc {
 							return false;
 						}
 						byte[] sidigest = sig.calculateSignedInfoDigest();
+						if(sidigest != null) {
 						String sDigHex = ConvertUtils.bin2hex(sidigest);
 						System.out.println("SignatureHash id: " + sig.getId() + " hash: " + sDigHex);
-						
+						} else {
+							System.err.println("ERROR: calculating signed info digest");
+						}
 					} catch(Exception ex) {
 						bOk = false;
 						System.err.println("ERROR: calculating signature value: " + ex);
@@ -727,8 +737,7 @@ public class jdigidoc {
 					if(cv != null && DigiDocGenFactory.isTestCard(cert)) {
 						lerrs1.add(new DigiDocException(DigiDocException.ERR_TEST_SIGNATURE, "Test signature!", null));
 					}
-					if(b)
-					  b = DigiDocVerifyFactory.verifySignatureFromLiveAndOcspFromTest(sig, lerrs1);
+					
 					System.out.print("\tSignature: " + sig.getId() + " profile: " + sig.getProfile() + " - ");
 					System.out.print(cn);
 					if(!b && hasNonWarningErrs(m_sdoc, lerrs1))
@@ -804,6 +813,8 @@ public class jdigidoc {
 	{
 		boolean bFound = false;
 		String dfId = null, dfName = null;
+		FileOutputStream fos = null;
+		InputStream is = null;
 		
 		for(int i = 0; (args != null) && (i < args.length); i++) {
 			if(args[i].equals("-ddoc-extract")) {
@@ -822,8 +833,8 @@ public class jdigidoc {
                 if(df.getId().equals(dfId)) {
                 	try {
                 		System.out.println("Extracting DF: " + dfId + " to: " + dfName);
-                		FileOutputStream fos = new FileOutputStream(dfName);
-                		InputStream is = df.getBodyAsStream();
+                		fos = new FileOutputStream(dfName);
+                		is = df.getBodyAsStream();
                 		if(is == null) {
                 			System.err.println("DataFile has no data!");
                 			return false;
@@ -835,11 +846,22 @@ public class jdigidoc {
                 			m += n;
                 		}
                 		fos.close();
+                		fos = null;
                 		is.close();
+                		is = null;
                 		bFound = true;
                 		System.out.println("Wrote: " + m + " bytes to: " + dfName);
                 	} catch(Exception ex) {
                 		System.err.println("ERROR: extracting df: " + dfId + " - " + ex);
+                	} finally {
+                		try {
+                			if(is != null)
+                				is.close();
+                			if(fos != null)
+                				fos.close();
+                		} catch(Exception ex2) {
+                			System.err.println("ERROR closing streams: " + ex2);
+                		}
                 	}
                 }
 			}
@@ -1283,7 +1305,7 @@ public class jdigidoc {
 	{
 		boolean bOk = true, bFound = false;
 		String inFile = null, outFile = null;
-		
+		FileOutputStream fos = null;
 		for(int i = 0; (args != null) && (i < args.length); i++) {
 			if(args[i].equals("-cdoc-encrypt-sk")) {
 				bFound = true;
@@ -1323,15 +1345,24 @@ public class jdigidoc {
 					m_cdoc.addProperty(EncryptedData.ENCPROP_ORIG_FILE, sb.toString());
 					m_cdoc.addProperty(EncryptedData.ENCPROP_ORIG_SIZE, new Long(data.length).toString());
 					m_cdoc.encrypt(EncryptedData.DENC_COMPRESS_NEVER); 
-					FileOutputStream fos = new FileOutputStream(outFile);
+					fos = new FileOutputStream(outFile);
 					fos.write(m_cdoc.toXML());
 					fos.close();
+					fos = null;
 					bOk = true;
 				} catch(Exception ex) {
 					bOk = false;
 					System.err.println("ERROR: encrypting file: " + inFile + " - " + ex);
 					ex.printStackTrace(System.err);
-				}
+				} finally {
+		        	if(fos != null) {
+		        		try {
+		        			fos.close();
+		        		} catch(Exception ex2) {
+		        			System.err.println("Error closing streams: " + ex2);
+		        		}
+		        	}
+		        }
 			} else {
 				bOk = false;
 				System.err.println("Missing input file or output file of the -cdoc-encrypt command");
@@ -1351,6 +1382,8 @@ public class jdigidoc {
 		boolean bOk = true, bFound = false, bExtract = false;
 		String pin = null, outFile = null, keystoreFile = null;
 		String sImpl = SignatureFactory.SIGFAC_TYPE_PKCS11;
+		FileOutputStream fos = null;
+		InputStream is = null;
 		
 		int nSlot = 0;
 		for(int i = 0; (args != null) && (i < args.length); i++) {
@@ -1412,15 +1445,16 @@ public class jdigidoc {
 					if(bExtract) {
 						//System.out.println("extracting D0");
 						//System.out.println("Writing ddoc to: " + outFile);
-						FileOutputStream fos = new FileOutputStream(outFile);
+						fos = new FileOutputStream(outFile);
 						fos.write(m_cdoc.getData());
 						fos.close();
+						fos = null;
 						DigiDocFactory digFac = ConfigManager.instance().getDigiDocFactory();
 						m_sdoc = digFac.readSignedDoc(outFile);
 						DataFile df = m_sdoc.getDataFile(0);
 						//System.out.println("Writing extracted data to: " + outFile);
 						fos = new FileOutputStream(outFile);
-		                InputStream is = df.getBodyAsStream();
+		                is = df.getBodyAsStream();
 		                if(is == null) {
 		                	System.err.println("DataFile has no data!");
 		                	return false;
@@ -1432,19 +1466,30 @@ public class jdigidoc {
 		                	m += n;
 		                }
 		                fos.close();
+		                fos = null;
 		                is.close();
-		                		
+		                is = null;
 					} else {
-					FileOutputStream fos = new FileOutputStream(outFile);
+					fos = new FileOutputStream(outFile);
 					fos.write(m_cdoc.getData());
 					fos.close();
+					fos = null;
 					}
 					bOk = true;
 				} catch(Exception ex) {
 					bOk = false;
 					System.err.println("ERROR: decrypting file: " + ex);
 					ex.printStackTrace(System.err);
-				}
+				} finally {
+		        	 try {
+		        	  if(fos != null)
+		        		fos.close();
+		        	  if(is != null)
+			        		is.close();
+		        	  } catch(Exception ex2) {
+		        		System.err.println("Error closing streams: " + ex2);
+		        	  }
+		        }
 			} else {
 				bOk = false;
 				System.err.println("Missing pin or output file of the -cdoc-decrypt command");
@@ -1463,6 +1508,8 @@ public class jdigidoc {
 	{
 		boolean bOk = true, bFound = false, bExtract = false;
 		String outFile = null, keystoreFile = null, keystorePasswd = null, keystoreType="JKS";
+		FileOutputStream fos = null;
+		InputStream is = null;
 		
 		for(int i = 0; (args != null) && (i < args.length); i++) {
 			if(args[i].equals("-cdoc-decrypt-pkcs12") || args[i].equals("-cdoc-decrypt-pkcs12-sk")) {
@@ -1510,15 +1557,16 @@ public class jdigidoc {
 					if(bExtract) {
 						//System.out.println("extracting D0");
 						//System.out.println("Writing ddoc to: " + outFile);
-						FileOutputStream fos = new FileOutputStream(outFile);
+						fos = new FileOutputStream(outFile);
 						fos.write(m_cdoc.getData());
 						fos.close();
+						fos = null;
 						DigiDocFactory digFac = ConfigManager.instance().getDigiDocFactory();
 						m_sdoc = digFac.readSignedDoc(outFile);
 						DataFile df = m_sdoc.getDataFile(0);
 						//System.out.println("Writing extracted data to: " + outFile);
 						fos = new FileOutputStream(outFile);
-		                InputStream is = df.getBodyAsStream();
+		                is = df.getBodyAsStream();
 		                if(is == null) {
 		                	System.err.println("DataFile has no data!");
 		                	return false;
@@ -1530,18 +1578,29 @@ public class jdigidoc {
 		                	m += n;
 		                }
 		                fos.close();
+		                fos = null;
 		                is.close();
-		                		
+		                is = null;
 					} else {
-					FileOutputStream fos = new FileOutputStream(outFile);
+					fos = new FileOutputStream(outFile);
 					fos.write(m_cdoc.getData());
 					fos.close();
+					fos = null;
 					}
 					bOk = true;
 				} catch(Exception ex) {
 					bOk = false;
 					System.err.println("ERROR: decrypting file: " + ex);
 					ex.printStackTrace(System.err);
+				} finally {
+					try {
+						if(is != null)
+							is.close();
+						if(fos != null)
+						fos.close();
+					} catch(Exception ex2) {
+						System.err.println("ERROR: closing file streams - " + ex2);
+					}
 				}
 			} else {
 				bOk = false;
@@ -1561,6 +1620,9 @@ public class jdigidoc {
 	{
 		boolean bOk = true, bFound = false, bExtract = false;
 		String inFile = null, outFile = null, keystoreFile = null, keystorePasswd = null, keystoreType="JKS", recipient = null;
+		FileInputStream fis = null;
+		FileOutputStream fos = null;
+		InputStream is = null;
 		
 		for(int i = 0; (args != null) && (i < args.length); i++) {
 			if(args[i].equals("-cdoc-decrypt-pkcs12-stream") || args[i].equals("-cdoc-decrypt-pkcs12-stream-sk")) {
@@ -1596,12 +1658,14 @@ public class jdigidoc {
 					// TODO: check cdoc existencs
 					System.out.println("Decrypting: " + inFile + " to: " + outFile + " recv: " + recipient);
 					try {
-						FileInputStream fis = new FileInputStream(inFile); 
-						FileOutputStream fos = new FileOutputStream(outFile);
+						fis = new FileInputStream(inFile); 
+						fos = new FileOutputStream(outFile);
 						EncryptedStreamParser streamParser = ConfigManager.instance().getEncryptedStreamParser();
 						streamParser.decryptStreamUsingTokenType(fis, fos, 0, keystorePasswd, SignatureFactory.SIGFAC_TYPE_PKCS12, keystoreFile);
 						fos.close();
+						fos = null;
 						fis.close();
+						fis = null;
 						bOk = true;
 					} catch(Exception ex) {
 						bOk = false;
@@ -1613,8 +1677,8 @@ public class jdigidoc {
 						m_sdoc = digFac.readSignedDoc(outFile);
 						DataFile df = m_sdoc.getDataFile(0);
 						//System.out.println("Writing extracted data to: " + outFile);
-						FileOutputStream fos = new FileOutputStream(outFile);
-		                InputStream is = df.getBodyAsStream();
+						fos = new FileOutputStream(outFile);
+		                is = df.getBodyAsStream();
 		                if(is == null) {
 		                	System.err.println("DataFile has no data!");
 		                	return false;
@@ -1626,14 +1690,26 @@ public class jdigidoc {
 		                	m += n;
 		                }
 		                fos.close();
+		                fos = null;
 		                is.close();
-		                		
+		                is = null;
 					} 
 					bOk = true;
 				} catch(Exception ex) {
 					bOk = false;
 					System.err.println("ERROR: decrypting file: " + ex);
 					ex.printStackTrace(System.err);
+				} finally {
+					try {
+						if(is != null)
+						  is.close();
+						if(fis != null)
+						  fis.close();
+						if(fos != null)
+						  fos.close();
+					} catch(Exception ex2) {
+						System.err.println("ERROR: closing file streams - " + ex2);
+					}
 				}
 			} else {
 				bOk = false;
@@ -1653,6 +1729,8 @@ public class jdigidoc {
 	{
 		boolean bOk = true, bFound = false;
 		String pin = null, outFile = null, inFile = null;
+		FileInputStream fis = null;
+		FileOutputStream fos = null;
 		
 		for(int i = 0; (args != null) && (i < args.length); i++) {
 			if(args[i].equals("-cdoc-decrypt-stream")) {
@@ -1675,17 +1753,28 @@ public class jdigidoc {
 			if(pin != null && outFile != null && inFile != null) {
 				System.out.println("Decrypting: " + inFile + " to: " + outFile);
 				try {
-					FileInputStream fis = new FileInputStream(inFile); 
-					FileOutputStream fos = new FileOutputStream(outFile);
+					fis = new FileInputStream(inFile); 
+					fos = new FileOutputStream(outFile);
 					EncryptedStreamParser streamParser = ConfigManager.instance().getEncryptedStreamParser();
 					streamParser.decryptStreamUsingTokenType(fis, fos, 0, pin, SignatureFactory.SIGFAC_TYPE_PKCS11, null);
 					fos.close();
+					fos = null;
 					fis.close();
+					fis = null;
 					bOk = true;
 				} catch(Exception ex) {
 					bOk = false;
 					System.err.println("ERROR: decrypting file: " + ex);
 					ex.printStackTrace(System.err);
+				} finally {
+					try {
+						if(fis != null)
+						  fis.close();
+						if(fos != null)
+						  fos.close();
+					} catch(Exception ex2) {
+						System.err.println("ERROR: closing file streams - " + ex2);
+					}
 				}
 			} else {
 				bOk = false;
@@ -1705,6 +1794,8 @@ public class jdigidoc {
 	{
 		boolean bOk = true, bFound = false;
 		String pin = null, outFile = null, inFile = null, recv = null;
+		FileInputStream fis = null;
+		FileOutputStream fos = null;
 		
 		for(int i = 0; (args != null) && (i < args.length); i++) {
 			if(args[i].equals("-cdoc-decrypt-stream-recv")) {
@@ -1731,18 +1822,29 @@ public class jdigidoc {
 			if(pin != null && outFile != null && inFile != null && recv != null) {
 				System.out.println("Decrypting: " + inFile + " to: " + outFile);
 				try {
-					FileInputStream fis = new FileInputStream(inFile); 
-					FileOutputStream fos = new FileOutputStream(outFile);
+					fis = new FileInputStream(inFile); 
+					fos = new FileOutputStream(outFile);
 					EncryptedStreamParser streamParser = ConfigManager.instance().getEncryptedStreamParser();
 					//streamParser.decryptStreamUsingTokenType(fis, fos, 0, pin, SignatureFactory.SIGFAC_TYPE_PKCS11, null);
 					streamParser.decryptStreamUsingRecipientName(fis, fos, 0, pin, recv);
 					fos.close();
+					fos = null;
 					fis.close();
+					fis = null;
 					bOk = true;
 				} catch(Exception ex) {
 					bOk = false;
 					System.err.println("ERROR: decrypting file: " + ex);
 					ex.printStackTrace(System.err);
+				} finally {
+					try {
+						if(fis != null)
+						  fis.close();
+						if(fos != null)
+						  fos.close();
+					} catch(Exception ex2) {
+						System.err.println("ERROR: closing file streams - " + ex2);
+					}
 				}
 			} else {
 				bOk = false;
@@ -1763,6 +1865,8 @@ public class jdigidoc {
 		boolean bOk = true, bFound = false;
 		String pin = null, outFile = null, inFile = null, slot = null, label = null;
 		int nSlot = 0;
+		FileInputStream fis = null;
+		FileOutputStream fos = null;
 		
 		for(int i = 0; (args != null) && (i < args.length); i++) {
 			if(args[i].equals("-cdoc-decrypt-stream-slot-label")) {
@@ -1795,17 +1899,28 @@ public class jdigidoc {
 			if(pin != null && outFile != null && inFile != null && label != null && nSlot > 0) {
 				System.out.println("Decrypting: " + inFile + " to: " + outFile);
 				try {
-					FileInputStream fis = new FileInputStream(inFile); 
-					FileOutputStream fos = new FileOutputStream(outFile);
+					fis = new FileInputStream(inFile); 
+					fos = new FileOutputStream(outFile);
 					EncryptedStreamParser streamParser = ConfigManager.instance().getEncryptedStreamParser();
 					streamParser.decryptStreamUsingRecipientSlotIdAndTokenLabel(fis, fos, nSlot, label, pin);
 					fos.close();
+					fos = null;
 					fis.close();
+					fis = null;
 					bOk = true;
 				} catch(Exception ex) {
 					bOk = false;
 					System.err.println("ERROR: decrypting file: " + ex);
 					ex.printStackTrace(System.err);
+				} finally {
+					try {
+						if(fis != null)
+						  fis.close();
+						if(fos != null)
+						  fos.close();
+					} catch(Exception ex2) {
+						System.err.println("ERROR: closing file streams - " + ex2);
+					}
 				}
 			} else {
 				bOk = false;
@@ -1982,6 +2097,8 @@ public class jdigidoc {
 	private boolean runCheckValidDdocCmds(String[] args)
 	{
 		boolean bOk = true;
+		ByteArrayOutputStream bos = null;
+		FileInputStream fis = null;
 		
 		for(int i = 0; (args != null) && (i < args.length); i++) {
 			if(args[i].equals("-cdoc-test")) {
@@ -1993,14 +2110,16 @@ public class jdigidoc {
 				
 				if(testFile != null) {
 					try {
-						ByteArrayOutputStream bos = new ByteArrayOutputStream();
-						FileInputStream fis = new FileInputStream(testFile);
+						bos = new ByteArrayOutputStream();
+						fis = new FileInputStream(testFile);
 						byte[] data = new byte[1024];
 						int n = 0;
 						while((n = fis.read(data)) > 0)
 							bos.write(data, 0, n);
 						fis.close();
+						fis = null;
 						data = bos.toByteArray();
+						bos.close();
 						bos = null;
 						// now test it
 						String s = new String(data);
@@ -2017,6 +2136,15 @@ public class jdigidoc {
 					} catch(Exception ex) {
 						System.err.println("ERROR: testing ddoc: " + testFile + " - " + ex);
 						ex.printStackTrace(System.err);
+					} finally {
+						try {
+							if(fis != null)
+							  fis.close();
+							if(bos != null)
+							  bos.close();
+						} catch(Exception ex2) {
+							System.err.println("ERROR: closing file streams - " + ex2);
+						}
 					}
 				} else {
 					bOk = false;

@@ -131,6 +131,10 @@ public class DigiDocVerifyFactory {
 			}
 			for(int j = 0; j < sdoc.getManifest().getNumFileEntries(); j++) {
 				ManifestFileEntry mfe = sdoc.getManifest().getFileEntry(j);
+				if(mfe == null) {
+					m_logger.error("Invalid manifest entry");
+					continue;
+				}
 				if(m_logger.isDebugEnabled()) 
 	            	m_logger.debug("Check manifest entry: " + mfe.getFullPath() + " mime: " + mfe.getMediaType());
 				if(mfe.getFullPath() != null && mfe.getFullPath().equals("/")) continue; // container root element
@@ -183,11 +187,14 @@ public class DigiDocVerifyFactory {
 		if(df != null) {
 			if(m_logger.isDebugEnabled()) 
             	m_logger.debug("Check digest for DF: " + df.getId() + " ref: " + ((ref != null) ? ref.getUri() : "NULL"));
-			String sDigType = ConfigManager.digAlg2Type(ref.getDigestAlgorithm());
+			String sDigType = null;
+			if(ref != null)
+			sDigType = ConfigManager.digAlg2Type(ref.getDigestAlgorithm());
 			if(m_logger.isDebugEnabled()) 
             	m_logger.debug("Check digest for DF: " + df.getId() + " type: " + sDigType);
 			byte[] dfDig = null;
             try {
+            	if(sDigType != null)
             	dfDig = df.getDigestValueOfType(sDigType);
             } catch(DigiDocException ex) {
                 lerrs.add(ex);
@@ -239,7 +246,7 @@ public class DigiDocVerifyFactory {
             }
             if(sdoc.getFormat().equals(SignedDoc.FORMAT_BDOC)) {
             	String sFile = df.getFileName();
-            	if(sFile != null && sFile.indexOf('/') != -1 || sFile.indexOf('\\') != -1) {
+            	if(sFile != null && (sFile.indexOf('/') != -1 || sFile.indexOf('\\') != -1)) {
             		File fT = new File(sFile);
             		sFile = fT.getName();
             	}
@@ -319,7 +326,7 @@ public class DigiDocVerifyFactory {
 			if(m_logger.isDebugEnabled()) 
                 m_logger.debug("No Reference element for SignedProperties: " + sp.getId());
             lerrs.add(new DigiDocException(DigiDocException.ERR_SIG_PROP_NOT_SIGNED,
-                    "No Reference element for SignedProperties: " + ((sp != null) ? sp.getId() : "?"), null));
+                    "No Reference element for SignedProperties sig: " + sig.getId(), null));
             bOk = false;
 		}
 		return bOk;
@@ -354,18 +361,6 @@ public class DigiDocVerifyFactory {
         	  sig.initVerify(cert.getPublicKey());
               sig.update(digest);
               rc = sig.verify(signature);
-              // if verification fails with CVC cipher then try again with same signature algorithm but non-cvc cipher
-              if(!rc && sigMethod.indexOf("ecdsa") != -1) {
-            	  sigType = ConfigManager.instance().sigMeth2SigType(sigMethod, false);
-              	  if(m_logger.isDebugEnabled()) 
-                    	m_logger.debug("Verify again xml:\n---\n" + new String(digest) + "\n---\n len: " + 
-                    			digest.length + " method: " + sigMethod + " sig-type: " + sigType + "\n---\n" + 
-                    			ConvertUtils.bin2hex(signature) + " sig-len: " + signature.length);
-              	sig = java.security.Signature.getInstance(sigType, ConfigManager.addProvider());
-          	    sig.initVerify(cert.getPublicKey());
-                sig.update(digest);
-                rc = sig.verify(signature);
-              }
             } else {
               if(m_logger.isDebugEnabled()) 
                 	m_logger.debug("Verify sig: " + signature.length + " bytes, alg: " + DIGIDOC_VERIFY_ALGORITHM + " sig-alg: " + sigMethod);
@@ -421,6 +416,14 @@ public class DigiDocVerifyFactory {
 	public static boolean verifySignatureValue(SignedDoc sdoc, Signature sig, List lerrs)
 	{
 		boolean bOk = true;
+		if(sdoc == null) {
+			m_logger.error("SignedDoc is null");
+			return false;
+		}
+		if(sig == null) {
+			m_logger.error("Signature is null");
+			return false;
+		}
 		if(m_logger.isDebugEnabled()) 
         	m_logger.debug("Verifying signature value of: " + sig.getId());
 		// verify signature value
@@ -439,7 +442,7 @@ public class DigiDocVerifyFactory {
             	m_logger.info("Signature: " + sig.getId() + " has weak signature method: " + sig.getSignedInfo().getSignatureMethod());
             }
             if(sig.getSignatureValue() != null && sig.getSignatureValue().getValue() != null) {
-            	if(sdoc != null && (sdoc.getFormat().equals(SignedDoc.FORMAT_BDOC) && sig.isEllipticCurveSiganture())) {
+            	if(sdoc.getFormat().equals(SignedDoc.FORMAT_BDOC) && sig.isEllipticCurveSiganture()) {
             		if(m_logger.isDebugEnabled()) 
                     	m_logger.debug("Verify sdoc: " + sdoc.getFormat() + "/" + sdoc.getVersion() + " prefs: " + sdoc.getXmlDsigNs() + "/" + sdoc.getAsicNs() + "/" + sdoc.getXadesNs());
             		//DigiDocXmlGenFactory genFac = new DigiDocXmlGenFactory(sdoc);
@@ -527,7 +530,7 @@ public class DigiDocVerifyFactory {
               bOk = verifyCertificate(cert, caCert);
               if(m_logger.isDebugEnabled()) 
             	m_logger.debug("Signer: " + ConvertUtils.getCommonName(sig.getKeyInfo().getSignersCertificate().getSubjectDN().getName()) +
-            			" is issued by trusted CA: " + ((caCert != null) ? ConvertUtils.getCommonName(caCert.getSubjectDN().getName()) : "NULL"));
+            			" is issued by trusted CA: " + ConvertUtils.getCommonName(caCert.getSubjectDN().getName()));
 	        } else {
 	        	if(m_logger.isDebugEnabled()) 
 	            	m_logger.debug("CA not found for: " + ConvertUtils.getCommonName(cert.getSubjectDN().getName()));
@@ -641,8 +644,9 @@ public class DigiDocVerifyFactory {
 		if(m_logger.isDebugEnabled()) 
         	m_logger.debug("Verifying live/test for signature: " + sig.getId());
 		X509Certificate cert = null, rCert = null;
-		CertValue cvOcsp = sig.getCertValueOfType(CertValue.CERTVAL_TYPE_RESPONDER);
-		if(sig != null && sig.getKeyInfo() != null && cvOcsp != null) {
+		if(sig != null) {
+		  CertValue cvOcsp = sig.getCertValueOfType(CertValue.CERTVAL_TYPE_RESPONDER);
+		  if(sig.getKeyInfo() != null && cvOcsp != null) {
 			cert = sig.getKeyInfo().getSignersCertificate();
 			rCert = cvOcsp.getCert();
 			if(cert != null && rCert != null && 
@@ -654,6 +658,7 @@ public class DigiDocVerifyFactory {
 		            		"Signer from LIVE CA-chain but OCSP from TEST CA-chain!", null));
 		            bOk = false;
 			}
+		  }
 		}
 		return bOk;
 	}
