@@ -485,7 +485,7 @@ public class SAXDigiDocFactory
 					} else if(ze.getName().equals(FILE_MANIFEST)) { // manifest.xml file
 						if(m_logger.isDebugEnabled())
 							m_logger.debug("Read manifest");
-						if(!bManifest1) {
+						if(!bManifest1 && isEntry != null) {
 						  bManifest1 = true;
 						  BdocManifestParser mfparser = new BdocManifestParser(m_doc);
 						  mfparser.readManifest(isEntry);
@@ -904,9 +904,9 @@ public class SAXDigiDocFactory
 			m_logger.debug("Sig: " + sig.getId() + " certids: " + sig.countCertIDs());
 		for(int i = 0; (sig != null) && (i < sig.countCertIDs()); i++) {
 				CertID cid = sig.getCertID(i);
-				if(m_logger.isDebugEnabled() && cid != null)
-					m_logger.debug("CertId: " + cid.getId() + " type: " + cid.getType() + " nr: " + cid.getSerial());
-				if(cid.getType() == CertID.CERTID_TYPE_UNKNOWN) {
+				if(cid != null && cid.getType() == CertID.CERTID_TYPE_UNKNOWN) {
+					if(m_logger.isDebugEnabled())
+						m_logger.debug("CertId: " + cid.getId() + " type: " + cid.getType() + " nr: " + cid.getSerial());
 					CertValue cval = sig.findCertValueWithSerial(cid.getSerial());
 					if(cval != null) {
 						String cn = null;
@@ -926,7 +926,7 @@ public class SAXDigiDocFactory
 									m_logger.debug("Cert: " + cn + " is TSA cert");
 								cid.setType(CertID.CERTID_TYPE_TSA);
 								cval.setType(CertValue.CERTVAL_TYPE_TSA);
-								if(m_logger.isDebugEnabled() && cid != null)
+								if(m_logger.isDebugEnabled())
 									m_logger.debug("CertId: " + cid.getId() + " type: " + cid.getType() + " nr: " + cid.getSerial());
 							}
 						} catch(DigiDocException ex) {

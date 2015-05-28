@@ -78,10 +78,10 @@ public class DigiDocVerifyFactory {
 				if(sdoc.getManifest() != null) {
 				  for(int j = 0; j < sdoc.getManifest().getNumFileEntries(); j++) {
 					ManifestFileEntry mfe = sdoc.getManifest().getFileEntry(j);
-					if(m_logger.isDebugEnabled()) 
-		            	m_logger.debug("Manifest entry: " + mfe.getFullPath() + " mime: " + mfe.getMediaType() + " df: " + df.getId() + " df-mime: " + df.getMimeType());
-					
-					if(mfe.getFullPath() != null && mfe.getFullPath().equals(sFileName)) {
+					if(mfe != null) {
+					  if(m_logger.isDebugEnabled()) 
+			           	m_logger.debug("Manifest entry: " + mfe.getFullPath() + " mime: " + mfe.getMediaType() + " df: " + df.getId() + " df-mime: " + df.getMimeType());
+					  if(mfe.getFullPath() != null && mfe.getFullPath().equals(sFileName)) {
 						if(bF) {
 							lerrs.add(new DigiDocException(DigiDocException.ERR_MANIFEST_ENTRY,
 									"Duplicate ManifestFileEntry for: " + df.getFileName(), null));
@@ -101,6 +101,7 @@ public class DigiDocVerifyFactory {
 										" does not match manifest mime type: " + mfe.getMediaType());
 							bOk = false;
 						}
+					  }
 					}
 				  } // for j
 				  for(int s = 0; s < sdoc.countSignatures(); s++) {
@@ -324,7 +325,7 @@ public class DigiDocVerifyFactory {
 	        
 		} else {
 			if(m_logger.isDebugEnabled()) 
-                m_logger.debug("No Reference element for SignedProperties: " + sp.getId());
+                m_logger.debug("No Reference element for SignedProperties of sig: " + sig.getId());
             lerrs.add(new DigiDocException(DigiDocException.ERR_SIG_PROP_NOT_SIGNED,
                     "No Reference element for SignedProperties sig: " + sig.getId(), null));
             bOk = false;
@@ -441,7 +442,7 @@ public class DigiDocVerifyFactory {
               if(m_logger.isInfoEnabled()) 
             	m_logger.info("Signature: " + sig.getId() + " has weak signature method: " + sig.getSignedInfo().getSignatureMethod());
             }
-            if(sig.getSignatureValue() != null && sig.getSignatureValue().getValue() != null) {
+            if(sig.getSignatureValue() != null && sig.getSignatureValue().getValue() != null && dig != null) {
             	if(sdoc.getFormat().equals(SignedDoc.FORMAT_BDOC) && sig.isEllipticCurveSiganture()) {
             		if(m_logger.isDebugEnabled()) 
                     	m_logger.debug("Verify sdoc: " + sdoc.getFormat() + "/" + sdoc.getVersion() + " prefs: " + sdoc.getXmlDsigNs() + "/" + sdoc.getAsicNs() + "/" + sdoc.getXadesNs());

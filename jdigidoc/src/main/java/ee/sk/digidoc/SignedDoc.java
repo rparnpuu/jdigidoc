@@ -964,8 +964,10 @@ public class SignedDoc implements Serializable
         		File fT = new File(sFile);
         		sFile = fT.getName();
         	}
+        	if(sFile != null) {
         	ManifestFileEntry fe = new ManifestFileEntry(df.getMimeType(), sFile);
         	m_manifest.addFileEntry(fe);
+        	}
     		}
         }
         if(m_dataFiles == null)

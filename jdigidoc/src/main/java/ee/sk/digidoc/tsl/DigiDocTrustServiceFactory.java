@@ -65,7 +65,7 @@ public class DigiDocTrustServiceFactory
             			m_logger.debug("CA" + c + " ca-cert" + n + " - " + certLoc);
     				try {
     				  X509Certificate cert = readCertificate(certLoc);
-    				  if(cert != null) 
+    				  if(cert != null && tsp != null) 
     					addCATspService(tsp, cert);
     				} catch(Exception ex2) {
     					m_logger.warn("Failed to read CA cert: " + certLoc);

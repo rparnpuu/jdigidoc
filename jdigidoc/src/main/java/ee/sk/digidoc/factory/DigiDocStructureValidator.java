@@ -145,12 +145,13 @@ public class DigiDocStructureValidator {
 		String sPath = ePath.getPath(true);
 		String sRoot = ePath.getRootTag();
 		XmlElemDef eCurr = null, eRoot = null;
-		if(sRoot.equals("SignedDoc")) 
+		if(sRoot != null) {
+		  if(sRoot.equals("SignedDoc")) 
 			eRoot = eSignedDoc;
-		if(sRoot.equals("XAdESSignatures")) 
+		  if(sRoot.equals("XAdESSignatures")) 
 			eRoot = eXAdESSignatures;
-		if(eRoot != null)
-			eCurr = eRoot.findChildByTag(ePath.getTag());
+		  eCurr = eRoot.findChildByTag(ePath.getTag());
+		}
 		if(eCurr == null) {
 			ex = new DigiDocException(DigiDocException.ERR_PARSE_XML, "Invalid xml element: " + sPath, null);
 		}

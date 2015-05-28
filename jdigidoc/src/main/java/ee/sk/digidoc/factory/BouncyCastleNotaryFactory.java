@@ -800,15 +800,18 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         throws DigiDocException
     {
         Notary not = null;
-        
         // check the result
-        if(resp == null || resp.getStatus() != OCSPRespBuilder.SUCCESSFUL) {
+        if(resp == null) {
+        	throw new DigiDocException(DigiDocException.ERR_OCSP_UNSUCCESSFULL, 
+            "OCSP response is null!", null); 
+        }
+        if(resp.getStatus() != OCSPRespBuilder.SUCCESSFUL) {
             if (resp.getStatus() == OCSPRespBuilder.UNAUTHORIZED){ 
              	throw new DigiDocException(DigiDocException.ERR_OCSP_UNAUTHORIZED, 
                 "OCSP response unauthorized! ", null); 
             } else { 
-             	throw new DigiDocException(DigiDocException.ERR_OCSP_UNSUCCESSFULL, 
-             	"OCSP response unsuccessfull!", null); 
+            	throw new DigiDocException(DigiDocException.ERR_OCSP_UNSUCCESSFULL, 
+                        "OCSP response unsuccessfull!", null); 
             } 
         }
         try {            
@@ -1323,6 +1326,9 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
 	private void verifyRespStatus(OCSPResp resp) 
 		throws DigiDocException 
 	{
+		if(resp == null || resp.getStatus() != OCSPRespBuilder.SUCCESSFUL)
+		    throw new DigiDocException(DigiDocException.ERR_OCSP_UNSUCCESSFULL,
+		        "OCSP response unsuccessfull! ", null);
 		int status = resp.getStatus();
 			switch (status) {
 				case OCSPRespBuilder.INTERNAL_ERROR: m_logger.error("An internal error occured in the OCSP Server!"); break;
@@ -1333,9 +1339,6 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
 				case OCSPRespBuilder.SUCCESSFUL: break;
 				default: m_logger.error("Unknown OCSPResponse status code! "+status);
 			}
-		if(resp == null || resp.getStatus() != OCSPRespBuilder.SUCCESSFUL)
-		    throw new DigiDocException(DigiDocException.ERR_OCSP_UNSUCCESSFULL,
-		        "OCSP response unsuccessfull! ", null);
 	}
 
     

@@ -559,6 +559,7 @@ public class DigiDocXmlGenFactory {
 		// <DataObjectFormat>
 		for(int i = 0; (sdof != null) && (i < sdof.countDataObjectFormats()); i++) {
 			DataObjectFormat dof = sdof.getDataObjectFormat(i);
+			if(dof != null)
 			dataObjectFormat2xml(sb, dof, sig);
 		}
 		// TODO: other structure elements not used
