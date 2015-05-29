@@ -6,8 +6,8 @@ import ee.sk.digidoc.SignedDoc;
 import ee.sk.digidoc.TokenKeyInfo;
 import ee.sk.utils.ConfigManager;
 import ee.sk.utils.ConvertUtils;
-
 import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPrivateKey;
 import java.security.*;
 import java.io.*;
 import java.util.*;
@@ -180,6 +180,13 @@ public class Pkcs12SignatureFactory
     	return instance;
     }
     
+    private boolean isCvcEcKey(Signature sig)
+    {
+    	String sigMeth = sig.getSignedInfo().getSignatureMethod();
+    	String sSigType = ConfigManager.instance().sigMeth2SigType(sigMeth, true);
+    	return ConfigManager.isEcdsaCvcAlgorithm(sSigType);
+    }
+    
     /**
      * Method returns a digital signature. It finds the RSA private 
      * key object from the active token and
@@ -219,6 +226,25 @@ public class Pkcs12SignatureFactory
     		instance.initSign((PrivateKey)key);
     		instance.update(xml);
     		byte[] signature = instance.sign();
+    		boolean bEcCvcKey = isCvcEcKey(sig);
+    		if(m_logger.isDebugEnabled())
+    			m_logger.debug("Signature algorithm: " + key.getAlgorithm() + " siglen: " + signature.length + " ec-key: " + bEcCvcKey);
+    		if(bEcCvcKey) { 
+    			int nKeyLen = ((ECPrivateKey)key).getParams().getCurve().getField().getFieldSize();
+    			int nReqLen = nKeyLen / 8 * 2;
+    			int nSigLen = signature.length;
+    			if(m_logger.isDebugEnabled())
+	    			m_logger.debug("EC Signature length: " + nSigLen + " required: " + nReqLen);
+    			if(nSigLen < nReqLen) {
+    				if(m_logger.isDebugEnabled())
+    	    			m_logger.debug("Padding EC signature length: " + nSigLen + " to required: " + nReqLen);
+    				byte[] padsig = new byte[nReqLen];
+    				for(int i = 0; i < nReqLen; i++)
+    					padsig[i] = 0;
+    				System.arraycopy(signature, 0, padsig, nReqLen - nSigLen, signature.length);
+    				signature = padsig;
+    			}
+    		}
     		if(m_logger.isDebugEnabled() && signature != null)
     			m_logger.debug("Signature len: " + signature.length + "\n---\n sig: " + ConvertUtils.bin2hex(signature));
     		return signature;

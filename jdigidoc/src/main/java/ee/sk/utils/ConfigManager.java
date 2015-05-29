@@ -604,6 +604,16 @@ public class ConfigManager {
     	return null;
     }
     
+    public static boolean isEcdsaCvcAlgorithm(String sAlgo)
+    {
+    	return ((sAlgo != null) &&
+    			("SHA1withCVC-ECDSA".equals(sAlgo) ||
+    			"SHA224withCVC-ECDSA".equals(sAlgo) ||
+    			"SHA256withCVC-ECDSA".equals(sAlgo) ||
+    			"SHA384withCVC-ECDSA".equals(sAlgo) ||
+    			"SHA512withCVC-ECDSA".equals(sAlgo)));
+    }
+    
     /**
      * Returns digest type for given signature method URI
      * @param sigMeth signature method algorithm URI
