@@ -231,7 +231,7 @@ public class Pkcs12SignatureFactory
     			m_logger.debug("Signature algorithm: " + key.getAlgorithm() + " siglen: " + signature.length + " ec-key: " + bEcCvcKey);
     		if(bEcCvcKey) { 
     			int nKeyLen = ((ECPrivateKey)key).getParams().getCurve().getField().getFieldSize(); 
-    			int nReqLen = nKeyLen / 8 * 2;
+    			int nReqLen = ((int) Math.ceil((double) nKeyLen / 8)) * 2;
     			int nSigLen = signature.length;
     			if(m_logger.isDebugEnabled())
 	    			m_logger.debug("EC Signature length: " + nSigLen + " required: " + nReqLen);
@@ -239,8 +239,6 @@ public class Pkcs12SignatureFactory
     				if(m_logger.isDebugEnabled())
     	    			m_logger.debug("Padding EC signature length: " + nSigLen + " to required: " + nReqLen);
     				byte[] padsig = new byte[nReqLen];
-    				for(int i = 0; i < nReqLen; i++)
-    					padsig[i] = 0;
     				System.arraycopy(signature, 0, padsig, (nReqLen - nSigLen) / 2, nSigLen / 2);
     				System.arraycopy(signature, nSigLen / 2, padsig, (nReqLen / 2) + (nReqLen - nSigLen) / 2, nSigLen / 2);
     				signature = padsig;
