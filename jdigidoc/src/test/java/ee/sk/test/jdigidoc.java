@@ -737,8 +737,8 @@ public class jdigidoc {
 					if(cv != null && DigiDocGenFactory.isTestCard(cert)) {
 						lerrs1.add(new DigiDocException(DigiDocException.ERR_TEST_SIGNATURE, "Test signature!", null));
 					}
-					if(b)
-						  b = DigiDocVerifyFactory.verifySignatureFromLiveAndOcspFromTest(sig, lerrs1);
+					b = DigiDocVerifyFactory.verifySignatureFromLiveAndOcspFromTest(sig, lerrs1);
+					if(!b) bOk = b;
 					System.out.print("\tSignature: " + sig.getId() + " profile: " + sig.getProfile() + " - ");
 					System.out.print(cn);
 					if(!b && hasNonWarningErrs(m_sdoc, lerrs1))
