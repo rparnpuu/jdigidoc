@@ -1,10 +1,15 @@
 DigiDoc Java library 3.11 release notes
 -------------------------------------
 Changes compared to ver 3.10
-- Added support for BDOC signature refering to signed files with a leading slash before the filename
-in <Reference URI=""> attribute.
-- Fixed escaping quotes for generated xml element content
-- Fixed ocsp authentication to use random nonce
+
+- Moved checking for test signatures from library to utility program, in case the signer's certificate is issued from live CA chain but OCSP response is from test service. 
+- Added validation support for BDOC signatures referring to signed files with a leading slash before the file name in <Reference URI=""> attribute value.
+- Fixed escaping of quotation marks in XML element contents
+- Improved OCSP authentication functionality, a random nonce is now used in the request.
+- Removed obsolete DIGIDOC_DRIVER_BASE_URL configuration parameter from the default jdigidoc.cfg configuration file.
+- Fixed targeted JVM version in build files, the version is now 1.6
+
+
 
 DigiDoc Java library 3.10 release notes
 -------------------------------------
