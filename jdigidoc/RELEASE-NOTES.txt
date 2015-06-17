@@ -9,7 +9,7 @@ Changes compared to ver 3.10
 - Removed obsolete DIGIDOC_DRIVER_BASE_URL configuration parameter from the default jdigidoc.cfg configuration file.
 - Fixed targeted JVM version in build files, the version is now 1.6
 
-
+List of known issues: https://github.com/open-eid/jdigidoc/wiki/Known-issues
 
 DigiDoc Java library 3.10 release notes
 -------------------------------------
