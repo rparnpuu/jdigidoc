@@ -71,24 +71,33 @@ public class ConvertUtils
         0x05, 0x2b, 0x0e, 0x03, 0x02, 
         0x1a, 0x05, 0x00, 0x04, 0x14, 0x00 };
     /** SHA1 algortihm prefix - 00 30 21 30 09 06 05 2b 0e 03 02 1a 05 00 04 14  */
-    private static final byte[] sha1AlgPrefix = { 
-    	0x30, 0x1f, 0x30, 0x07, 0x06, 
-    	0x05, 0x2b, 0x0e, 0x03, 0x02, 
-    	0x1a, 0x04, 0x14 };
-    private static final byte[] sha1AlgPrefix2 = { 
+    private static final byte[] sha1AlgPrefix1 = { // long
         0x30, 0x21, 0x30, 0x09, 0x06, 
         0x05, 0x2b, 0x0e, 0x03, 0x02, 
         0x1a, 0x05, 0x00, 0x04, 0x14 };
+    private static final byte[] sha1AlgPrefix2 = { // short
+    	0x30, 0x1f, 0x30, 0x07, 0x06, 
+    	0x05, 0x2b, 0x0e, 0x03, 0x02, 
+    	0x1a, 0x04, 0x14 };
     /** SHA224 prefix - 00302d300d06096086480165030402040500041c */
-    private static final byte[] sha224AlgPrefix = { 
+    private static final byte[] sha224AlgPrefix1 = { // long
         0x30, 0x2d, 0x30, 0x0d, 0x06, 0x09, 0x60,
         (byte)0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 
         0x04, 0x05, 0x00, 0x04, 0x1c };
-    /** sha256 alg prefix - 003031300d0609608648016503040201050004205ad8f86f90558d973aba4ce9be116646efd2c57758e5238b841d50abe788bae9 */
-    private static final byte[] sha256AlgPrefix = {
-    	48, 49, 48, 13, 6, 9, 96, (byte)134, 72, 1 ,101, 3, 4, 2, 1, 5, 0, 4, 32
+    private static final byte[] sha224AlgPrefix2 = { // short
+        0x30, 0x2d, 0x30, 0x0d, 0x06, 0x09, 0x60,
+        (byte)0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 
+        0x04, 0x04, 0x1c }; 
+    /** sha256 alg prefix - 003031300d060960864801650304020105000420 5ad8f86f90558d973aba4ce9be116646efd2c57758e5238b841d50abe788bae9 */
+    private static final byte[] sha256AlgPrefix1 = { // long
+        0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, (byte)0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20
     };
-    private static final byte[] sha512AlgPrefix =
+    private static final byte[] sha256AlgPrefix2 = { // short
+    	0x30, 0x2f, 0x30, 0x0b, 0x06, 0x09, 0x60, (byte)0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x04, 0x20
+    };
+    private static final byte[] sha512AlgPrefix1 =   // long
+    { 0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, (byte)0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05, 0x00, 0x04, 0x40 };
+    private static final byte[] sha512AlgPrefix2 =    // short
     { 0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, (byte)0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05, 0x00, 0x04, 0x40 };
 
     
@@ -147,28 +156,28 @@ public class ConvertUtils
       			sha1AlgPrefix.length + 1, digest.length);
       	}*/
     	if(digest.length == SignedDoc.SHA1_DIGEST_LENGTH) {
-    	  ddata = new byte[sha1AlgPrefix2.length + digest.length];
-    	  System.arraycopy(sha1AlgPrefix2, 0, ddata, 0, sha1AlgPrefix2.length);
+    	  ddata = new byte[sha1AlgPrefix1.length + digest.length];
+    	  System.arraycopy(sha1AlgPrefix1, 0, ddata, 0, sha1AlgPrefix1.length);
     	  System.arraycopy(digest, 0, ddata, 
-    			sha1AlgPrefix2.length, digest.length);
+    			sha1AlgPrefix1.length, digest.length);
     	}
     	if(digest.length == SignedDoc.SHA224_DIGEST_LENGTH) {
-        	  ddata = new byte[sha224AlgPrefix.length + digest.length];
-        	  System.arraycopy(sha224AlgPrefix, 0, ddata, 0, sha224AlgPrefix.length);
+        	  ddata = new byte[sha224AlgPrefix1.length + digest.length];
+        	  System.arraycopy(sha224AlgPrefix1, 0, ddata, 0, sha224AlgPrefix1.length);
         	  System.arraycopy(digest, 0, ddata, 
-        			  sha224AlgPrefix.length, digest.length);
+        			  sha224AlgPrefix1.length, digest.length);
         }
     	if(digest.length == SignedDoc.SHA256_DIGEST_LENGTH) {
-      	  ddata = new byte[sha256AlgPrefix.length + digest.length];
-      	  System.arraycopy(sha256AlgPrefix, 0, ddata, 0, sha256AlgPrefix.length);
+      	  ddata = new byte[sha256AlgPrefix1.length + digest.length];
+      	  System.arraycopy(sha256AlgPrefix1, 0, ddata, 0, sha256AlgPrefix1.length);
       	  System.arraycopy(digest, 0, ddata, 
-      			sha256AlgPrefix.length, digest.length);
+      			sha256AlgPrefix1.length, digest.length);
       	}
     	if(digest.length == SignedDoc.SHA512_DIGEST_LENGTH) {
-      	  ddata = new byte[sha512AlgPrefix.length + digest.length];
-      	  System.arraycopy(sha512AlgPrefix, 0, ddata, 0, sha512AlgPrefix.length);
+      	  ddata = new byte[sha512AlgPrefix1.length + digest.length];
+      	  System.arraycopy(sha512AlgPrefix1, 0, ddata, 0, sha512AlgPrefix1.length);
       	  System.arraycopy(digest, 0, ddata, 
-      			sha512AlgPrefix.length, digest.length);
+      			sha512AlgPrefix1.length, digest.length);
       	}
     	return ddata;
     }
@@ -207,14 +216,17 @@ public class ConvertUtils
     	if((compareBytes(sha1AlgPrefix13Bad, digest, 0) && digest.length == 34) ||
     	   (compareBytes(sha1AlgPrefix15Bad, digest, 0) && digest.length == 36))
         	return SignedDoc.SHA1_DIGEST_TYPE_BAD;
-    	if(compareBytes(sha1AlgPrefix, digest, 0) ||
+    	if(compareBytes(sha1AlgPrefix1, digest, 0) ||
     		compareBytes(sha1AlgPrefix2, digest, 0))
     		return SignedDoc.SHA1_DIGEST_TYPE;
-    	if(compareBytes(sha224AlgPrefix, digest, 0))
+    	if(compareBytes(sha224AlgPrefix1, digest, 0) ||
+    	   compareBytes(sha224AlgPrefix2, digest, 0))
     		return SignedDoc.SHA224_DIGEST_TYPE;
-    	if(compareBytes(sha256AlgPrefix, digest, 0))
+    	if(compareBytes(sha256AlgPrefix1, digest, 0) ||
+    	   compareBytes(sha256AlgPrefix2, digest, 0))
     		return SignedDoc.SHA256_DIGEST_TYPE;
-    	if(compareBytes(sha512AlgPrefix, digest, 0))
+    	if(compareBytes(sha512AlgPrefix1, digest, 0) ||
+    	   compareBytes(sha512AlgPrefix2, digest, 0))
     		return SignedDoc.SHA512_DIGEST_TYPE;
     	return null;
     }
@@ -222,16 +234,22 @@ public class ConvertUtils
     public static byte[] removePrefix(byte[] digest)
     {
     	int nLen = 0;
-    	if(compareBytes(sha1AlgPrefix, digest, 0))
-    		nLen = sha1AlgPrefix.length;
+    	if(compareBytes(sha1AlgPrefix1, digest, 0))
+    		nLen = sha1AlgPrefix1.length;
     	else if(compareBytes(sha1AlgPrefix2, digest, 0))
     		nLen = sha1AlgPrefix2.length;
-    	else if(compareBytes(sha224AlgPrefix, digest, 0))
-    		nLen = sha224AlgPrefix.length;
-    	else if(compareBytes(sha256AlgPrefix, digest, 0))
-    		nLen = sha256AlgPrefix.length;
-    	else if(compareBytes(sha512AlgPrefix, digest, 0))
-    		nLen = sha512AlgPrefix.length;
+    	else if(compareBytes(sha224AlgPrefix1, digest, 0))
+    		nLen = sha224AlgPrefix1.length;
+    	else if(compareBytes(sha224AlgPrefix2, digest, 0))
+    		nLen = sha224AlgPrefix2.length;
+    	else if(compareBytes(sha256AlgPrefix1, digest, 0))
+    		nLen = sha256AlgPrefix1.length;
+    	else if(compareBytes(sha256AlgPrefix2, digest, 0))
+    		nLen = sha256AlgPrefix2.length;
+    	else if(compareBytes(sha512AlgPrefix1, digest, 0))
+    		nLen = sha512AlgPrefix1.length;
+    	else if(compareBytes(sha512AlgPrefix2, digest, 0))
+    		nLen = sha512AlgPrefix2.length;
     	if(nLen > 0) {
     		byte[] ndig = new byte[digest.length - nLen];
     		System.arraycopy(digest, 
@@ -246,13 +264,13 @@ public class ConvertUtils
     {
     	int nLen = 0;
     	if(digType.equals(SignedDoc.SHA1_DIGEST_TYPE))
-    		nLen = sha1AlgPrefix.length;
+    		nLen = sha1AlgPrefix1.length;
     	else if(digType.equals(SignedDoc.SHA224_DIGEST_TYPE))
-    		nLen = sha224AlgPrefix.length;
+    		nLen = sha224AlgPrefix1.length;
     	else if(digType.equals(SignedDoc.SHA256_DIGEST_TYPE))
-    		nLen = sha256AlgPrefix.length;
+    		nLen = sha256AlgPrefix1.length;
     	else if(digType.equals(SignedDoc.SHA512_DIGEST_TYPE))
-    		nLen = sha512AlgPrefix.length;
+    		nLen = sha512AlgPrefix1.length;
     	if(nLen > 0) {
     		byte[] ndig = new byte[digest.length - nLen];
     		System.arraycopy(digest, 
