@@ -31,16 +31,22 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.File;
 import java.util.Date;
+
 import ee.sk.utils.ConvertUtils;
+
 import java.io.OutputStream;
+
 import ee.sk.digidoc.factory.CanonicalizationFactory;
 import ee.sk.utils.ConfigManager;
+
 import org.w3c.dom.Node;
+
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.OutputKeys;
+
 import org.apache.log4j.Logger;
 //import com.sun.mail.util.BASE64DecoderStream;
 import org.apache.commons.codec.binary.Base64InputStream;
@@ -203,8 +209,13 @@ public class DataFile implements Serializable
     							calcHashes(new FileInputStream(m_fDfCache));
     					}
     					if(m_mimeType != null) {
-    	    				if(m_sigDoc.findManifestEntryByPath(m_fileName) == null) {
-    	    				ManifestFileEntry fe = new ManifestFileEntry(m_mimeType, m_fileName);
+    						String sFile = m_fileName;
+    			        	if(sFile != null && sFile.indexOf('/') != -1 || sFile.indexOf('\\') != -1) {
+    			        		File fT = new File(sFile);
+    			        		sFile = fT.getName();
+    			        	}
+    	    				if(m_sigDoc.findManifestEntryByPath(sFile) == null) {
+    	    				ManifestFileEntry fe = new ManifestFileEntry(m_mimeType, sFile);
     	    				m_sigDoc.getManifest().addFileEntry(fe);
     	    				}
     	    			}
