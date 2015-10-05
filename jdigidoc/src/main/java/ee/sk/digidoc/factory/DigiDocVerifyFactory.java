@@ -698,15 +698,8 @@ public class DigiDocVerifyFactory {
 		        			((rCert != null) ? rCert.getSubjectDN().getName() : "NULL") + 
 		            	           " complete cert refs nr: " + sSerial + " - " + sIssuer +
 		            	           " ca-ahel: " + ((rCert != null) ? (DigiDocGenFactory.isTestCard(rCert) ? "TEST" : "LIVE") : "?"));
-		        if(rCert == null) {
-		        	if(m_logger.isDebugEnabled()) 
-		            	m_logger.debug("No ocsp responder cert for: " + sig.getId());
-		        	lerrs.add(new DigiDocException(DigiDocException.ERR_RESPONDERS_CERT, 
-		                    "No notarys certificate!", null));
-		        	return false;
-		        }
 		        // signer/ocsp live/test verification moved to utility
-		        if(!rCert.getSerialNumber().equals(sSerial) &&
+		        if(rCert != null && !rCert.getSerialNumber().equals(sSerial) &&
 		        	!sig.getSignedDoc().getFormat().equals(SignedDoc.FORMAT_BDOC)) {
 		        	if(m_logger.isDebugEnabled())
 			        	m_logger.debug("Wrong notarys certificate: " + rCert.getSerialNumber() + " ref: " + sSerial);

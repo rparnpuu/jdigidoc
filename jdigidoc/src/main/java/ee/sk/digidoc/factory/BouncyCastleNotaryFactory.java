@@ -1094,10 +1094,6 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             BasicOCSPResp basResp = (BasicOCSPResp)resp.getResponseObject();
             // verify the response
             X509Certificate[] lNotCerts = null;
-            if(sig != null && sig.getUnsignedProperties() != null &&
-            		sig.getUnsignedProperties().getRespondersCertificate() == null) {
-    			throw new DigiDocException(DigiDocException.ERR_RESPONDERS_CERT, "OCSP responders certificate is required!", null);
-    		}
             try {
             	String respondIDstr = responderIDtoString(basResp);
             	
@@ -1114,8 +1110,6 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 	m_logger.debug("RESP: " + Base64Util.encode(resp.getEncoded()));
             	}
             	if(lNotCerts == null && sig != null) {
-            		String ddocRespCertNr = sig.getUnsignedProperties().
-						getRespondersCertificate().getSerialNumber().toString();
             		String respSrch = respondIDstr;
             		if((respSrch.indexOf("CN") != -1))
             			respSrch = ConvertUtils.getCommonName(respondIDstr);
@@ -1125,7 +1119,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             		if(n1 > 0)
             			respSrch = respSrch.substring(0, n1);
             		if(m_logger.isDebugEnabled())
-            			m_logger.debug("Search not cert by: " + respSrch + " nr: " + ddocRespCertNr);
+            			m_logger.debug("Search not cert by: " + respSrch);
             		// TODO: get multiple certs
             		lNotCerts = getNotaryCerts(respSrch, null /*ddocRespCertNr*/);
             	}

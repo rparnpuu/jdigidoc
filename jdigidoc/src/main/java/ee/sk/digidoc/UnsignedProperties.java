@@ -169,11 +169,6 @@ public class UnsignedProperties implements Serializable
     private DigiDocException validateRespondersCertificate(X509Certificate cert)
     {
         DigiDocException ex = null;
-        if(cert == null && (m_signature.getSignedDoc().getFormat().equals(SignedDoc.FORMAT_DIGIDOC_XML) ||
-        		(m_signature.getSignedDoc().getFormat().equals(SignedDoc.FORMAT_BDOC) && m_signature.getProfile() != null && 
-        		(m_signature.getProfile().equals(SignedDoc.BDOC_PROFILE_TS) || m_signature.getProfile().equals(SignedDoc.BDOC_PROFILE_TM)))))
-            ex = new DigiDocException(DigiDocException.ERR_RESPONDERS_CERT, 
-                "Notarys certificate is required", null);
         return ex;
     }
     
