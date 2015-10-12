@@ -125,16 +125,16 @@ public class DigiDocXmlGenFactory {
 			xmlElemAttr(sb, "Type", SignedDoc.SIGNEDPROPERTIES_TYPE);
 		  String s = ref.getUri();
 		  if(s.startsWith("/") || s.startsWith("#"))
-			s = s.charAt(0) + ConvertUtils.uriEncode(s.substring(1));
+			s = s.charAt(0) + ConvertUtils.uriEncodePath(s.substring(1));
 		  else
-			s = ConvertUtils.uriEncode(s);
+			s = ConvertUtils.uriEncodePath(s);
 		  xmlElemAttr(sb, "URI", s);
 		} else {
 			String s = ref.getUri();
 			if(s.startsWith("/") || s.startsWith("#"))
-				s = s.charAt(0) + ConvertUtils.uriEncode(s.substring(1));
+				s = s.charAt(0) + ConvertUtils.uriEncodePath(s.substring(1));
 			else
-				s = ConvertUtils.uriEncode(s);
+				s = ConvertUtils.uriEncodePath(s);
 			xmlElemAttr(sb, "URI", s);
 		}
 	    xmlElemTagEnd(sb, true);

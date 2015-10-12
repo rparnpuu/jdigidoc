@@ -751,6 +751,51 @@ public class ConvertUtils
 		}
 		return null;
     }
+    
+    
+    /*
+    Not converting:
+    (From RFC  RFC 3986 "URI Generic Syntax")
+    unreserved    = ALPHA / DIGIT / “-” / “.” / “_” / “~”
+    gen-delims = “:” / “/” / “?” / “#” / “[” / “]” / “@”
+    sub-delims    = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="
+    */
+   public static String uriEncodePath(String s1)
+   {
+   	try {
+   		String s = s1;
+   		//s = replaceStr(s, '[', "%5B");
+   		//s = replaceStr(s, ']', "%5D");
+   	  	if(m_logger.isDebugEnabled())
+ 			  m_logger.debug("Before uri-path-enc: " + s);
+   	  	s = URLEncoder.encode(s, "UTF-8");
+ 		s = replaceStr(s, '+', "%20");
+ 		// restore mark chars that got converted
+ 		s = s.replaceAll("%7E", "~");
+ 		s = s.replaceAll("%26", Matcher.quoteReplacement("&amp;"));
+ 		// TODO: should also be removed for compatibility with CPP
+ 		s = s.replaceAll("%21", "!");
+		  s = s.replaceAll("%40", "@");
+		  s = s.replaceAll("%27", "\'");
+		  s = s.replaceAll("%24", Matcher.quoteReplacement("$"));
+		  s = s.replaceAll("%28", "(");
+  		  s = s.replaceAll("%29", ")");
+  		  s = s.replaceAll("%3D", "=");
+  		  s = s.replaceAll("%2B", "+");
+  		  s = s.replaceAll("%2C", ",");
+          s = s.replaceAll("%3B", ";");
+          s = s.replaceAll("%2F", "/");
+          s = s.replaceAll("%3F", "?");
+       // TODO: should also be removed - end
+          
+		if(m_logger.isDebugEnabled())
+		  m_logger.debug("URI path: " + s1 + " encoded: " + s);
+		return s;
+	} catch(Exception ex) {
+		m_logger.error("Error encoding path: " + ex);
+	}
+	return null;
+   }
  
     public static String escapeXmlSymbols(String s1)
     {
