@@ -21,10 +21,13 @@
 
 package ee.sk.digidoc;
 import java.io.Serializable;
+
 //import java.util.zip.*;
 //import org.apache.tools.zip.*;
 import org.apache.commons.compress.archivers.zip.*;
+
 import ee.sk.utils.ConvertUtils;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.io.File;
@@ -42,8 +45,11 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateFactory;
+
 import javax.crypto.Cipher;
+
 import org.apache.log4j.Logger;
+
 import ee.sk.digidoc.factory.DigiDocFactory;
 import ee.sk.digidoc.factory.DigiDocVerifyFactory;
 import ee.sk.digidoc.factory.DigiDocXmlGenFactory;
@@ -956,19 +962,17 @@ public class SignedDoc implements Serializable
     		throw new DigiDocException(DigiDocException.ERR_DATA_FILE_FILE_NAME,
 					"Duplicate DataFile filename: " + df.getFileName(), null);
     	}
-    	if(m_format.equals(SignedDoc.FORMAT_BDOC)) {
-    		if(findManifestEntryByPath(df.getFileName()) == null) {
-        	df.setContentType(DataFile.CONTENT_BINARY);
+    	if(m_format.equals(SignedDoc.FORMAT_BDOC) && df.getFileName() != null) {
+    		df.setContentType(DataFile.CONTENT_BINARY);
         	String sFile = df.getFileName();
-        	if(sFile != null && sFile.indexOf('/') != -1 || sFile.indexOf('\\') != -1) {
+        	if(sFile.indexOf('/') != -1 || sFile.indexOf('\\') != -1) {
         		File fT = new File(sFile);
         		sFile = fT.getName();
         	}
-        	if(sFile != null) {
-        	ManifestFileEntry fe = new ManifestFileEntry(df.getMimeType(), sFile);
-        	m_manifest.addFileEntry(fe);
+    		if(findManifestEntryByPath(sFile) == null) {
+        	  ManifestFileEntry fe = new ManifestFileEntry(df.getMimeType(), sFile);
+         	  m_manifest.addFileEntry(fe);
         	}
-    		}
         }
         if(m_dataFiles == null)
             m_dataFiles = new ArrayList();
