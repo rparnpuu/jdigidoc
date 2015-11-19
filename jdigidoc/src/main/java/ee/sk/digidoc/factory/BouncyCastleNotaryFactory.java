@@ -1516,8 +1516,9 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             int nConfTm = ConfigManager.instance().getIntProperty("OCSP_TIMEOUT", -1);
             if(nConfTm >= 0) {
             	if(m_logger.isDebugEnabled())
-    				m_logger.debug("Setting connection timeout to: " + nConfTm + " [ms]");
+    				m_logger.debug("Setting connection and read timeout to: " + nConfTm + " [ms]");
             	con.setConnectTimeout(nConfTm);
+            	con.setReadTimeout(nConfTm);
             }
             con.setAllowUserInteraction(false);
             con.setUseCaches(false);
