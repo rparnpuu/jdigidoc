@@ -85,7 +85,7 @@ public class ConvertUtils
         (byte)0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 
         0x04, 0x05, 0x00, 0x04, 0x1c };
     private static final byte[] sha224AlgPrefix2 = { // short
-        0x30, 0x2d, 0x30, 0x0d, 0x06, 0x09, 0x60,
+    	0x30, 0x2b, 0x30, 0x0b, 0x06, 0x09, 0x60,
         (byte)0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 
         0x04, 0x04, 0x1c }; 
     /** sha256 alg prefix - 003031300d060960864801650304020105000420 5ad8f86f90558d973aba4ce9be116646efd2c57758e5238b841d50abe788bae9 */
@@ -98,7 +98,7 @@ public class ConvertUtils
     private static final byte[] sha512AlgPrefix1 =   // long
     { 0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, (byte)0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05, 0x00, 0x04, 0x40 };
     private static final byte[] sha512AlgPrefix2 =    // short
-    { 0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, (byte)0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05, 0x00, 0x04, 0x40 };
+    { 0x30, 0x4f, 0x30, 0x0b, 0x06, 0x09, 0x60, (byte)0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x04, 0x40 };
 
     
     /**
@@ -260,7 +260,13 @@ public class ConvertUtils
     	return null;
     }
     
-    public static byte[] removePrefixByType(byte[] digest, String digType)
+    /*
+     * IB-4056 this method was commented out because it requires caller to know
+     * the prefix used. If this is not the case error will occur.
+     * Use instead byte[] removePrefix(byte[] digest) that determines which prefix
+     * is used before removing it.
+     */
+    /*public static byte[] removePrefixByType(byte[] digest, String digType)
     {
     	int nLen = 0;
     	if(digType.equals(SignedDoc.SHA1_DIGEST_TYPE))
@@ -279,7 +285,7 @@ public class ConvertUtils
     		return ndig;
     	}
     	return null;
-    }
+    }*/
     
     /**
      * Helper method to convert a string
