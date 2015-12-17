@@ -261,7 +261,8 @@ public class Reference implements Serializable
         DigiDocException ex = null;
         if(str == null || 
         	(!str.equals(SignedDoc.SHA1_DIGEST_ALGORITHM) &&
-        	 !str.equals(SignedDoc.SHA256_DIGEST_ALGORITHM_1) &&
+        	 !str.equals(SignedDoc.SHA224_DIGEST_ALGORITHM) &&
+             !str.equals(SignedDoc.SHA256_DIGEST_ALGORITHM_1) &&
         	 !str.equals(SignedDoc.SHA256_DIGEST_ALGORITHM_2) &&
         	 !str.equals(SignedDoc.SHA512_DIGEST_ALGORITHM)))
             ex = new DigiDocException(DigiDocException.ERR_DIGEST_ALGORITHM, 
@@ -301,6 +302,7 @@ public class Reference implements Serializable
         DigiDocException ex = null;
         if(data == null || 
           (data.length != SignedDoc.SHA1_DIGEST_LENGTH &&
+           data.length != SignedDoc.SHA224_DIGEST_LENGTH &&
            data.length != SignedDoc.SHA256_DIGEST_LENGTH &&
            data.length != SignedDoc.SHA512_DIGEST_LENGTH))
             ex = new DigiDocException(DigiDocException.ERR_DIGEST_LENGTH, 
