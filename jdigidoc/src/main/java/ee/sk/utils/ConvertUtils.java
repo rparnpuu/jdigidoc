@@ -776,23 +776,21 @@ public class ConvertUtils
  			  m_logger.debug("Before uri-path-enc: " + s);
    	  	s = URLEncoder.encode(s, "UTF-8");
  		s = replaceStr(s, '+', "%20");
- 		// restore mark chars that got converted
  		s = s.replaceAll("%7E", "~");
- 		s = s.replaceAll("%26", Matcher.quoteReplacement("&amp;"));
- 		// TODO: should also be removed for compatibility with CPP
- 		s = s.replaceAll("%21", "!");
-		  s = s.replaceAll("%40", "@");
-		  s = s.replaceAll("%27", "\'");
-		  s = s.replaceAll("%24", Matcher.quoteReplacement("$"));
-		  s = s.replaceAll("%28", "(");
-  		  s = s.replaceAll("%29", ")");
-  		  s = s.replaceAll("%3D", "=");
-  		  s = s.replaceAll("%2B", "+");
-  		  s = s.replaceAll("%2C", ",");
-          s = s.replaceAll("%3B", ";");
-          s = s.replaceAll("%2F", "/");
-          s = s.replaceAll("%3F", "?");
-       // TODO: should also be removed - end
+ 		// the following chars are not restored for compatibility with CPP and Digidoc4j
+// 		s = s.replaceAll("%26", Matcher.quoteReplacement("&amp;"));
+// 		s = s.replaceAll("%21", "!");
+//		  s = s.replaceAll("%40", "@");
+//		  s = s.replaceAll("%27", "\'");
+//		  s = s.replaceAll("%24", Matcher.quoteReplacement("$"));
+//		  s = s.replaceAll("%28", "(");
+//		  s = s.replaceAll("%29", ")");
+//		  s = s.replaceAll("%3D", "=");
+//		  s = s.replaceAll("%2B", "+");
+//		  s = s.replaceAll("%2C", ",");
+//	      s = s.replaceAll("%3B", ";");
+//	      s = s.replaceAll("%2F", "/");
+//	      s = s.replaceAll("%3F", "?");
           
 		if(m_logger.isDebugEnabled())
 		  m_logger.debug("URI path: " + s1 + " encoded: " + s);
