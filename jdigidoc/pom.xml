@@ -1,6 +1,6 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>ee.eesti.id</groupId>
+  <groupId>ee.sk.digidoc</groupId>
   <artifactId>jdigidoc</artifactId>
   <packaging>jar</packaging>
   <name>Java DigiDoc library</name>
@@ -14,8 +14,18 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+  <developers>
+    <developer>
+      <name>Veiko Sinivee</name>
+      <email>veiks26@hot.ee</email>
+      <organization>Sunset Software OÜ</organization>
+      <organizationUrl>http://www.sunsetsoftware.ee/</organizationUrl>
+    </developer>
+  </developers>
   <scm>
-    <url>https://id.eesti.ee/idtrac/browser/jdigidoc</url>
+    <connection>scm:git:git@github.com:open-eid/jdigidoc.git</connection>
+    <developerConnection>scm:git:git@github.com:open-eid/jdigidoc.git</developerConnection>
+    <url>https://github.com/open-eid/jdigidoc.git</url>
   </scm>
   <dependencies>
     <dependency>
@@ -94,6 +104,35 @@
               <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
             </manifest>
           </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.4</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.10.3</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <additionalparam>-Xdoclint:none</additionalparam>
         </configuration>
       </plugin>
     </plugins>
