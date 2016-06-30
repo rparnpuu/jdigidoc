@@ -1224,7 +1224,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
 	 */
 	private String responderIDtoString(BasicOCSPResp basResp) {
 		if(basResp != null) {
-			ResponderID respid = basResp.getResponderId().toASN1Object();
+			ResponderID respid = basResp.getResponderId().toASN1Primitive();
 			Object o = ((DERTaggedObject)respid.toASN1Object()).getObject();
 			if(o instanceof org.bouncycastle.asn1.DEROctetString) {
 				org.bouncycastle.asn1.DEROctetString oc = (org.bouncycastle.asn1.DEROctetString)o;

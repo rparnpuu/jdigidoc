@@ -11,6 +11,9 @@ verifying signatures and adding confirmations in OCSP format.
 DigiDoc documents are XML files based on the international standards XML-DSIG, ETSI TS 101 903 and others. 
 DigiDoc documents and the JDigiDoc library implement a subset of XML-DSIG and ETSI TS 101 903.
 
+### Warning! Do not use on new projects!
+This library is deprecated. It is recommended to use a newer [DigiDoc4j](https://github.com/open-eid/digidoc4j) library.
+
 ### Build status
   * Travis - [![Build Status](https://travis-ci.org/open-eid/jdigidoc.png?branch=master)](https://travis-ci.org/open-eid/jdigidoc)
   * Coverity - [![Coverity status](https://scan.coverity.com/projects/931/badge.svg?flat=1)](https://scan.coverity.com/projects/931/)

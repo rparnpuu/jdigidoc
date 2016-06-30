@@ -5,7 +5,7 @@
   <packaging>jar</packaging>
   <name>Java DigiDoc library</name>
   <version>${JDD_VERSION}</version>
-  <description>A Java libray for manipulating Estonian digital signature container files DDOC and BDOC</description>
+  <description>A Java libray for manipulating Estonian digital signature container files DDOC and BDOC. Note that this library is deprecated. It is recommended to use the new DigiDoc4j library at https://github.com/open-eid/digidoc4j</description>
   <url>http://id.eesti.ee</url>
   <licenses>
     <license>
@@ -36,17 +36,17 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk15on</artifactId>
-      <version>1.51</version>
+      <version>1.54</version>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk15on</artifactId>
-      <version>1.51</version>
+      <version>1.54</version>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcmail-jdk15on</artifactId>
-      <version>1.51</version>
+      <version>1.54</version>
     </dependency>
     <dependency>
       <groupId>iaik.pkcs</groupId>
