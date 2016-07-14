@@ -54,11 +54,13 @@ import java.io.*;
 import java.util.Random;
 import java.security.SecureRandom;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
+import org.bouncycastle.asn1.ocsp.BasicOCSPResponse;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ocsp.CertID;
 import org.bouncycastle.asn1.ocsp.ResponderID;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -91,6 +93,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+import org.bouncycastle.operator.ContentVerifier;
+import org.bouncycastle.operator.ContentVerifierProvider;
 import org.apache.log4j.Logger;
 
 
@@ -836,7 +840,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             boolean bOk = false;
             try {
             	X509CertificateHolder ch = new X509CertificateHolder(notaryCert.getEncoded());
-        		bOk = basResp.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(ch));
+        		bOk = isSignatureValid(basResp, new JcaContentVerifierProviderBuilder().setProvider("BC").build(ch));
             } catch (Exception ex) {
                 m_logger.error("OCSP Signature verification error!!!", ex); 
                 DigiDocException.handleException(ex, DigiDocException.ERR_OCSP_VERIFY);
@@ -881,7 +885,31 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         return not;
     }
 
+    public boolean isSignatureValid(BasicOCSPResp resp, ContentVerifierProvider verifierProvider)
+            throws Exception
+        {
+            try
+            {
 
+                ContentVerifier verifier = verifierProvider.get(resp.getSignatureAlgorithmID());
+                OutputStream vOut = verifier.getOutputStream();
+                vOut.write(resp.getTBSResponseData());
+                vOut.close();
+                ASN1Primitive obj = ASN1Primitive.fromByteArray(resp.getEncoded());
+                BasicOCSPResponse bresp = BasicOCSPResponse.getInstance(obj);
+                boolean bOk = verifier.verify(bresp.getSignature().getBytes());
+                if(m_logger.isDebugEnabled())
+                  m_logger.debug("Verify ocsp sig: " + ConvertUtils.bin2hex(bresp.getSignature().getBytes()) + " RC: " + bOk);
+                return bOk;
+            }
+            catch (Exception ex)
+            {
+                m_logger.error("ocsp exception: " + ex);
+                m_logger.error("Trace; " + ConvertUtils.getTrace(ex));
+                throw ex;
+            }
+        }
+    
     /**
      * Verifies that the OCSP response is about our signers
      * cert and the response status is successfull
@@ -1134,7 +1162,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             					((cert != null) ? ConvertUtils.getCommonName(cert.getSubjectDN().getName()) + " nr: " + cert.getSerialNumber().toString() : "NULL"));
             		if(cert != null) {
             		X509CertificateHolder ch = new X509CertificateHolder(cert.getEncoded());
-            		bOk = basResp.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(ch));
+            		bOk = isSignatureValid(basResp, new JcaContentVerifierProviderBuilder().setProvider("BC").build(ch));
             		} else bOk = false;
             		if(m_logger.isDebugEnabled())
             			m_logger.debug("OCSP resp: " + ((basResp != null) ? responderIDtoString(basResp) : "NULL") +
@@ -1147,7 +1175,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             		  X509Certificate rCert = cvOcsp.getCert();
             		  if(rCert != null) {
             			X509CertificateHolder ch = new X509CertificateHolder(rCert.getEncoded());
-                		bOk = basResp.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(ch));
+                		bOk = isSignatureValid(basResp, new JcaContentVerifierProviderBuilder().setProvider("BC").build(ch));
                 		if(m_logger.isDebugEnabled())
                 			m_logger.debug("OCSP resp: " + ((basResp != null) ? responderIDtoString(basResp) : "NULL") +
                     			" verify using cert in xml: " + ConvertUtils.getCommonName(rCert.getSubjectDN().getName()) +
